@@ -11,9 +11,14 @@ export const tasksUpdateHandlers = factory.createHandlers(
   zValidator("param", tasksUpdateParams),
   zValidator("json", tasksUpdateBody),
   async (c: TasksUpdateContext) => {
+    const user = c.get("user");
+    if (!user) {
+      return c.json({ message: "Unauthorized", code: "UNAUTHORIZED" }, 401);
+    }
+
     const { id } = c.req.valid("param");
     const body = c.req.valid("json");
-    const existing = await taskRepository.findById(id as never);
+    const existing = await taskRepository.findById(user.id, id as never);
 
     if (!existing) {
       return c.json({ message: "Task not found", code: "NOT_FOUND" }, 404);

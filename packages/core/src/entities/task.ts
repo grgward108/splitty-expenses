@@ -11,6 +11,7 @@ export type TaskStatus = "pending" | "in_progress" | "completed";
 export class Task extends BaseEntity<string> {
   constructor(
     public readonly id: string,
+    public readonly userId: string,
     public readonly title: string,
     public readonly description: string | null,
     public readonly status: TaskStatus,
@@ -26,13 +27,14 @@ export class Task extends BaseEntity<string> {
    */
   static create(
     id: string,
+    userId: string,
     title: string,
     description: string | null,
     status: TaskStatus,
     dueDate: string | null
   ): Task {
     const now = new Date().toISOString();
-    return new Task(id, title, description, status, dueDate, now, now);
+    return new Task(id, userId, title, description, status, dueDate, now, now);
   }
 
   /**
@@ -46,6 +48,7 @@ export class Task extends BaseEntity<string> {
   }): Task {
     return new Task(
       this.id,
+      this.userId,
       updates.title ?? this.title,
       updates.description !== undefined ? updates.description : this.description,
       updates.status ?? this.status,

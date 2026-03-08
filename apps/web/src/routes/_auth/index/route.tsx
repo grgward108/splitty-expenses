@@ -24,39 +24,12 @@ import {
 } from "@repo/ui";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import type { Task, TaskFormData, TaskStatus } from "./route.model";
+import { statusColors, statusLabels } from "./route.model";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_auth/")({
   component: TasksPage,
 });
-
-type TaskStatus = "pending" | "in_progress" | "completed";
-
-const statusLabels: Record<TaskStatus, string> = {
-  pending: "未着手",
-  in_progress: "進行中",
-  completed: "完了",
-};
-
-const statusColors: Record<TaskStatus, "default" | "warning" | "success"> = {
-  pending: "default",
-  in_progress: "warning",
-  completed: "success",
-};
-
-type Task = {
-  id: string;
-  title: string;
-  description?: string | null;
-  status: string;
-  dueDate?: string | null;
-};
-
-type TaskFormData = {
-  id: string;
-  title: string;
-  description: string;
-  status: TaskStatus;
-};
 
 function TasksPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

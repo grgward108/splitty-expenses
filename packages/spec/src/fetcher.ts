@@ -18,6 +18,7 @@ export const customFetch = async <T>(url: string, options?: RequestInit): Promis
   try {
     response = await fetch(fullUrl, {
       ...options,
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...options?.headers,

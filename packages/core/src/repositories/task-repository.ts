@@ -1,15 +1,17 @@
 import type { Task } from "../entities/task";
 import type { TaskId } from "../types";
-import type { Repository } from "./index";
+import type { PaginatedResult, PaginationParams } from "../types";
 
 /**
- * Task repository interface
+ * Task repository interface (scoped by userId)
  */
-export interface TaskRepository extends Repository<Task, TaskId> {
-  /**
-   * Find tasks by status
-   */
+export interface TaskRepository {
+  findById(userId: string, id: TaskId): Promise<Task | null>;
+  findAll(userId: string, params?: PaginationParams): Promise<PaginatedResult<Task>>;
+  save(task: Task): Promise<Task>;
+  delete(userId: string, id: TaskId): Promise<void>;
   findByStatus(
+    userId: string,
     status: Task["status"],
     params?: { page?: number; limit?: number }
   ): Promise<{

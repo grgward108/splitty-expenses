@@ -11,11 +11,17 @@ const factory = createFactory();
 export const tasksCreateHandlers = factory.createHandlers(
   zValidator("json", tasksCreateBody),
   async (c: TasksCreateContext) => {
+    const user = c.get("user");
+    if (!user) {
+      return c.json({ message: "Unauthorized", code: "UNAUTHORIZED" }, 401);
+    }
+
     const body = c.req.valid("json");
     const id = crypto.randomUUID();
 
     const task = Task.create(
       id,
+      user.id,
       body.title,
       body.description ?? null,
       body.status ?? "pending",

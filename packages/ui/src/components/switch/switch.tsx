@@ -66,7 +66,7 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
               "pointer-events-none inline-block transform rounded-full",
               "bg-white shadow-lg ring-0 transition duration-200 ease-in-out",
               sizeClass.thumb,
-              checked ? sizeClass.translate : "translate-x-1"
+              checked ? sizeClass.translate : "translate-x-0"
             )}
           />
         </button>

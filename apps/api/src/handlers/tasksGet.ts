@@ -10,8 +10,13 @@ const factory = createFactory();
 export const tasksGetHandlers = factory.createHandlers(
   zValidator("param", tasksGetParams),
   async (c: TasksGetContext) => {
+    const user = c.get("user");
+    if (!user) {
+      return c.json({ message: "Unauthorized", code: "UNAUTHORIZED" }, 401);
+    }
+
     const { id } = c.req.valid("param");
-    const task = await taskRepository.findById(id as never);
+    const task = await taskRepository.findById(user.id, id as never);
 
     if (!task) {
       return c.json({ message: "Task not found", code: "NOT_FOUND" }, 404);
