@@ -5,7 +5,7 @@ import * as schema from "./schema.js";
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
   throw new Error(
-    "DATABASE_URL is not set. Copy .mise.local.toml.example to .mise.local.toml and set DATABASE_URL."
+    "DATABASE_URL is not set. Run with `mise run …` so .mise.local.toml is loaded (e.g. mise run dev, mise run dev:api)."
   );
 }
 
