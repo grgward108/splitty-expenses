@@ -21,19 +21,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 rounded-xl active:scale-95";
+      "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-500 disabled:pointer-events-none disabled:opacity-50 rounded-xl active:scale-[0.98] hover:-translate-y-0.5 disabled:translate-y-0";
 
     const variants = {
-      primary: "bg-primary-600 text-white hover:bg-primary-700 shadow-sm shadow-primary-600/20",
+      primary:
+        "bg-primary-500 text-white hover:bg-primary-600 shadow-soft shadow-primary-500/15 focus-visible:ring-primary-500",
       secondary:
-        "bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus-visible:ring-secondary-500",
+        "bg-secondary-100 text-secondary-900 hover:bg-secondary-200 focus-visible:ring-secondary-400 dark:bg-secondary-800 dark:text-secondary-100 dark:hover:bg-secondary-700",
       outline:
-        "border border-secondary-200 bg-transparent text-secondary-900 hover:bg-secondary-50 dark:border-secondary-700 dark:text-secondary-100 dark:hover:bg-secondary-800",
-      ghost: "hover:bg-secondary-100 dark:hover:bg-secondary-800",
-      destructive: "bg-red-600 text-white hover:bg-red-700 shadow-sm shadow-red-600/20",
+        "border border-secondary-200 bg-transparent text-secondary-900 hover:bg-secondary-50 dark:border-secondary-600 dark:text-secondary-100 dark:hover:bg-secondary-800 focus-visible:ring-primary-500",
+      ghost: "hover:bg-secondary-100 dark:hover:bg-secondary-800 focus-visible:ring-secondary-400",
+      destructive:
+        "bg-danger-500 text-white hover:bg-danger-600 shadow-soft shadow-danger-500/15 focus-visible:ring-danger-500",
       gradient:
-        "bg-gradient-to-r from-primary-600 to-primary-500 text-white hover:from-primary-700 hover:to-primary-600 shadow-lg shadow-primary-500/25",
-      glass: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20",
+        "bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-600 hover:to-primary-700 shadow-card shadow-primary-500/20 focus-visible:ring-primary-500",
+      glass:
+        "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20 focus-visible:ring-white/30",
     };
 
     const sizes = {
