@@ -10,14 +10,19 @@ const factory = createFactory();
 export const tasksDeleteHandlers = factory.createHandlers(
   zValidator("param", tasksDeleteParams),
   async (c: TasksDeleteContext) => {
+    const user = c.get("user");
+    if (!user) {
+      return c.json({ message: "Unauthorized", code: "UNAUTHORIZED" }, 401);
+    }
+
     const { id } = c.req.valid("param");
-    const existing = await taskRepository.findById(id as never);
+    const existing = await taskRepository.findById(user.id, id as never);
 
     if (!existing) {
       return c.json({ message: "Task not found", code: "NOT_FOUND" }, 404);
     }
 
-    await taskRepository.delete(id as never);
+    await taskRepository.delete(user.id, id as never);
     return c.body(null, 204);
   }
 );

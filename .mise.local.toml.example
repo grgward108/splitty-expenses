@@ -4,3 +4,12 @@
 [env]
 POSTGRES_PASSWORD = "your_local_password_here"
 DATABASE_URL = "postgresql://postgres:your_local_password_here@localhost:5432/app_dev"
+
+# Better Auth（認証基盤）
+# BETTER_AUTH_SECRET は32文字以上のランダム文字列を設定してください（例: openssl rand -base64 32）
+BETTER_AUTH_SECRET = ""
+BETTER_AUTH_URL = "http://localhost:3000"
+
+# Google OAuth（Google でサインインする場合）
+GOOGLE_CLIENT_ID = ""
+GOOGLE_CLIENT_SECRET = ""

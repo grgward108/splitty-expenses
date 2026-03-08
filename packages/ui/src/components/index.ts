@@ -60,6 +60,18 @@ export {
   type DialogFooterProps,
   type DialogCloseProps,
 } from "./dialog";
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  type DropdownMenuProps,
+  type DropdownMenuTriggerProps,
+  type DropdownMenuContentProps,
+  type DropdownMenuItemProps,
+  type DropdownMenuSeparatorProps,
+} from "./dropdown-menu";
 
 // Typography components
 export { Heading, type HeadingProps } from "./heading";
