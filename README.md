@@ -22,7 +22,7 @@ A full-stack TypeScript monorepo built with Turborepo.
 | Package | Description | Tech |
 |---------|-------------|------|
 | `packages/core` | Domain logic (no external dependencies) | Pure TypeScript |
-| `packages/infrastructure` | External service integrations | DynamoDB, AWS SDK |
+| `packages/infrastructure` | External service integrations | PostgreSQL, Drizzle ORM |
 | `packages/ui` | Shared UI components & Storybook | React, TailwindCSS, Storybook |
 | `packages/spec` | API specification & code generation | TypeSpec, Orval, OpenAPI, Zod |
 | `packages/cdk` | Infrastructure as Code | AWS CDK |
@@ -62,25 +62,32 @@ mise run dev:mobile
 mise run dev:api
 ```
 
-### Local Database (DynamoDB Local)
+### Local Database (PostgreSQL)
 
-ローカル開発では Docker Compose で DynamoDB Local を使用します。
+ローカル開発では Docker Compose で PostgreSQL を使用します。**初回のみ** mise のローカル設定を用意してください。
 
 ```bash
-# DynamoDB Local を起動
+# 初回のみ: .mise.local.toml を作成（パスワードと DATABASE_URL を設定）
+cp .mise.local.toml.example .mise.local.toml
+# .mise.local.toml を開き、POSTGRES_PASSWORD と DATABASE_URL をローカル用の値に書き換える
+```
+
+`mise run` でタスクを実行すると `.mise.local.toml` の環境変数が読み込まれるため、`docker:up` や `db:migrate` でその値が使われます。
+
+```bash
+# PostgreSQL を起動
 mise run docker:up
 
-# テーブルを初期化
-mise run dynamodb:init
+# マイグレーションを実行
+mise run db:migrate
 
 # 停止
 mise run docker:down
 ```
 
-- **DynamoDB Local**: http://localhost:8000
-- **DynamoDB Admin UI**: http://localhost:8001
+- **PostgreSQL**: localhost:5432（接続文字列は `DATABASE_URL`）
 
-> Note: `mise run dev` を実行すると、自動的に DynamoDB Local が起動しテーブルが初期化されます。
+> Note: `mise run dev` を実行すると、自動的に Docker Compose で PostgreSQL が起動しマイグレーションが実行されます。その前に `.mise.local.toml` の設定が必要です。
 
 ### API Generation Flow
 
@@ -127,12 +134,12 @@ monorepo/
 │   └── api/              # Hono API server
 ├── packages/
 │   ├── core/             # Domain logic
-│   ├── infrastructure/   # External integrations (DynamoDB)
+│   ├── infrastructure/   # External integrations (PostgreSQL, Drizzle ORM)
 │   ├── ui/               # Shared UI components + Storybook
 │   ├── spec/             # API spec & generated code (client + server)
 │   ├── cdk/              # AWS CDK infrastructure
 │   └── tailwind-config/  # Shared Tailwind config
-├── docker-compose.yml    # DynamoDB Local
+├── docker-compose.yml    # PostgreSQL (local)
 ├── turbo.json            # Turborepo config
 ├── pnpm-workspace.yaml   # pnpm workspace config
 └── tsconfig.json         # Base TypeScript config
@@ -155,19 +162,21 @@ monorepo/
 | `mise run storybook` | Start Storybook |
 | `mise run docker:up` | Start Docker Compose services |
 | `mise run docker:down` | Stop Docker Compose services |
-| `mise run dynamodb:init` | Initialize DynamoDB tables |
+| `mise run db:migrate` | Run PostgreSQL migrations |
+| `mise run db:generate` | Generate Drizzle migration files |
+| `mise run db:studio` | Open Drizzle Studio |
 
 ## Environment Variables
 
-`.mise.toml` で以下の環境変数が設定されています（ローカル開発用）:
+- **`.mise.toml`**: 共通の環境変数（`NODE_ENV`, `VITE_API_BASE_URL` など）。リポジトリにコミットされます。
+- **`.mise.local.toml`**: ローカル専用の環境変数（`DATABASE_URL`, `POSTGRES_PASSWORD` など）。`.gitignore` されているためコミットされません。初回は `.mise.local.toml.example` をコピーして作成します。
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | 環境 | `development` |
-| `VITE_API_BASE_URL` | API のベース URL | `http://localhost:3000` |
-| `DYNAMODB_ENDPOINT` | DynamoDB エンドポイント | `http://localhost:8000` |
-| `AWS_REGION` | AWS リージョン | `us-east-1` |
-| `DYNAMODB_TABLE_NAME` | DynamoDB テーブル名 | `tasks` |
+| Variable | Description |
+|----------|-------------|
+| `NODE_ENV` | 環境（.mise.toml） |
+| `VITE_API_BASE_URL` | API のベース URL（.mise.toml） |
+| `DATABASE_URL` | PostgreSQL 接続文字列（.mise.local.toml） |
+| `POSTGRES_PASSWORD` | Docker Compose 用 PostgreSQL パスワード（.mise.local.toml） |
 
 ## Mobile Development
 

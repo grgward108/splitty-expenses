@@ -1,69 +1,48 @@
-import {
-  DeleteCommand,
-  GetCommand,
-  PutCommand,
-  QueryCommand,
-  ScanCommand,
-} from "@aws-sdk/lib-dynamodb";
 import type { TaskRepository } from "@repo/core";
 import { Task, type TaskStatus } from "@repo/core";
 import type { PaginatedResult, PaginationParams, TaskId } from "@repo/core";
-import { dynamoDBClient, getTableName } from "../database/dynamodb";
+import { eq, sql } from "drizzle-orm";
+import { db } from "../database/drizzle.js";
+import { tasks } from "../database/schema.js";
 
 /**
- * DynamoDB implementation of TaskRepository
+ * Drizzle/PostgreSQL implementation of TaskRepository
  */
-export class DynamoDBTaskRepository implements TaskRepository {
-  private readonly tableName: string;
-
-  constructor() {
-    this.tableName = getTableName();
-  }
-
+export class DrizzleTaskRepository implements TaskRepository {
   async findById(id: TaskId): Promise<Task | null> {
-    const command = new GetCommand({
-      TableName: this.tableName,
-      Key: { id: String(id) },
-    });
-
-    const result = await dynamoDBClient.send(command);
-
-    if (!result.Item) {
-      return null;
-    }
-
-    return this.mapToTask(result.Item);
+    const [row] = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.id, String(id)))
+      .limit(1);
+    if (!row) return null;
+    return this.mapToTask(row);
   }
 
   async findAll(params?: PaginationParams): Promise<PaginatedResult<Task>> {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 10;
+    const offset = (page - 1) * limit;
 
-    const command = new ScanCommand({
-      TableName: this.tableName,
-      Limit: limit,
-    });
+    const [countResult] = await db.select({ count: sql<number>`count(*)::int` }).from(tasks);
+    const total = countResult?.count ?? 0;
 
-    const result = await dynamoDBClient.send(command);
-    const items = (result.Items || []).map((item: Record<string, unknown>) => this.mapToTask(item));
-
-    // Simple pagination (DynamoDB pagination would use LastEvaluatedKey)
-    const start = (page - 1) * limit;
-    const paginatedItems = items.slice(start, start + limit);
+    const rows = await db.select().from(tasks).limit(limit).offset(offset);
+    const items = rows.map((row) => this.mapToTask(row));
 
     return {
-      items: paginatedItems,
-      total: items.length,
+      items,
+      total,
       page,
       limit,
-      totalPages: Math.ceil(items.length / limit),
+      totalPages: Math.ceil(total / limit),
     };
   }
 
   async save(task: Task): Promise<Task> {
-    const command = new PutCommand({
-      TableName: this.tableName,
-      Item: {
+    await db
+      .insert(tasks)
+      .values({
         id: task.id,
         title: task.title,
         description: task.description,
@@ -71,20 +50,22 @@ export class DynamoDBTaskRepository implements TaskRepository {
         dueDate: task.dueDate,
         createdAt: task.createdAt,
         updatedAt: task.updatedAt,
-      },
-    });
-
-    await dynamoDBClient.send(command);
+      })
+      .onConflictDoUpdate({
+        target: tasks.id,
+        set: {
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          dueDate: task.dueDate,
+          updatedAt: task.updatedAt,
+        },
+      });
     return task;
   }
 
   async delete(id: TaskId): Promise<void> {
-    const command = new DeleteCommand({
-      TableName: this.tableName,
-      Key: { id: String(id) },
-    });
-
-    await dynamoDBClient.send(command);
+    await db.delete(tasks).where(eq(tasks.id, String(id)));
   }
 
   async findByStatus(
@@ -99,44 +80,48 @@ export class DynamoDBTaskRepository implements TaskRepository {
   }> {
     const page = params?.page ?? 1;
     const limit = params?.limit ?? 10;
+    const offset = (page - 1) * limit;
 
-    const command = new QueryCommand({
-      TableName: this.tableName,
-      IndexName: "status-index",
-      KeyConditionExpression: "#status = :status",
-      ExpressionAttributeNames: {
-        "#status": "status",
-      },
-      ExpressionAttributeValues: {
-        ":status": status,
-      },
-      Limit: limit,
-    });
+    const countRows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(tasks)
+      .where(eq(tasks.status, status));
+    const total = countRows[0]?.count ?? 0;
 
-    const result = await dynamoDBClient.send(command);
-    const items = (result.Items || []).map((item: Record<string, unknown>) => this.mapToTask(item));
-
-    const start = (page - 1) * limit;
-    const paginatedItems = items.slice(start, start + limit);
+    const rows = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.status, status))
+      .limit(limit)
+      .offset(offset);
+    const items = rows.map((row) => this.mapToTask(row));
 
     return {
-      items: paginatedItems,
-      total: items.length,
+      items,
+      total,
       page,
       limit,
-      totalPages: Math.ceil(items.length / limit),
+      totalPages: Math.ceil(total / limit),
     };
   }
 
-  private mapToTask(item: Record<string, unknown>): Task {
+  private mapToTask(row: {
+    id: string;
+    title: string;
+    description: string | null;
+    status: TaskStatus;
+    dueDate: string | null;
+    createdAt: string;
+    updatedAt: string;
+  }): Task {
     return new Task(
-      item.id as string,
-      item.title as string,
-      (item.description as string) || null,
-      item.status as TaskStatus,
-      (item.dueDate as string) || null,
-      item.createdAt as string,
-      item.updatedAt as string
+      row.id,
+      row.title,
+      row.description ?? null,
+      row.status,
+      row.dueDate ?? null,
+      row.createdAt,
+      row.updatedAt
     );
   }
 }

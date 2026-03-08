@@ -37,6 +37,4 @@ coverage/
 apps/mobile/ios/
 apps/mobile/android/
 
-dynamodb-data/
-
 *.tsbuildinfo

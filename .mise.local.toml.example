@@ -1,0 +1,6 @@
+# このファイルを .mise.local.toml にコピーし、ローカル用の値を設定してください。
+# .mise.local.toml は .gitignore されており、コミットされません。
+
+[env]
+POSTGRES_PASSWORD = "your_local_password_here"
+DATABASE_URL = "postgresql://postgres:your_local_password_here@localhost:5432/app_dev"

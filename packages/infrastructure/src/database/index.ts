@@ -2,5 +2,5 @@
  * Database connection utilities
  */
 
-// DynamoDB utilities
-export * from "./dynamodb";
+export * from "./drizzle.js";
+export * from "./schema.js";
