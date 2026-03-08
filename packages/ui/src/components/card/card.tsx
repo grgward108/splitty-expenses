@@ -9,11 +9,11 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = "default", ...props }, ref) => {
     const variants = {
       default:
-        "bg-white dark:bg-secondary-950 border border-secondary-200 dark:border-secondary-800 shadow-sm",
+        "bg-white dark:bg-secondary-900 border border-secondary-200/80 dark:border-secondary-700/80 shadow-card",
       glass:
-        "bg-white/70 dark:bg-secondary-900/70 backdrop-blur-xl border border-white/20 dark:border-secondary-800/20 shadow-soft",
+        "bg-white/80 dark:bg-secondary-800/60 backdrop-blur-xl border border-secondary-200/50 dark:border-secondary-700/30 shadow-soft",
       modern:
-        "bg-white dark:bg-secondary-900 border border-transparent dark:border-secondary-700 shadow-modern",
+        "bg-white dark:bg-secondary-900 border border-transparent dark:border-secondary-700/50 shadow-modern",
     };
 
     return (
