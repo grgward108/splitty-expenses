@@ -1,0 +1,22 @@
+{
+  "name": "monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.14.2",
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2"
+  },
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx,json}": ["biome check --write --no-errors-on-unmatched"]
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

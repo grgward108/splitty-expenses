@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.turbo/
+*.tsbuildinfo
+
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# mise local config (optional)
+.mise.local.toml
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+
+# Mobile
+apps/mobile/ios/
+apps/mobile/android/
+
+dynamodb-data/
+
+*.tsbuildinfo

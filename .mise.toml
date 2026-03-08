@@ -1,0 +1,195 @@
+[tools]
+node = "22"
+pnpm = "9"
+
+[env]
+NODE_ENV = "development"
+VITE_API_BASE_URL = "http://localhost:3000"
+DYNAMODB_ENDPOINT = "http://localhost:8000"
+AWS_REGION = "us-east-1"
+AWS_ACCESS_KEY_ID = "dummy"
+AWS_SECRET_ACCESS_KEY = "dummy"
+DYNAMODB_TABLE_NAME = "tasks"
+
+# ============================================
+# 開発タスク
+# ============================================
+
+[tasks.dev]
+description = "全アプリの開発サーバーを起動"
+depends = ["dynamodb:init"]
+run = "pnpm turbo run dev"
+
+[tasks."dev:api"]
+description = "APIサーバーのみ起動"
+depends = ["dynamodb:init"]
+run = "pnpm --filter @repo/api dev"
+
+[tasks."dev:web"]
+description = "Webアプリのみ起動"
+run = "pnpm --filter @repo/web dev"
+
+[tasks."dev:mobile"]
+description = "モバイルアプリのみ起動"
+run = "pnpm --filter @repo/mobile dev"
+
+# ============================================
+# ビルドタスク
+# ============================================
+
+[tasks.build]
+description = "全パッケージをビルド"
+run = "pnpm turbo run build"
+
+[tasks."build:api"]
+description = "APIのみビルド"
+run = "pnpm --filter @repo/api build"
+
+[tasks."build:web"]
+description = "Webアプリのみビルド"
+run = "pnpm --filter @repo/web build"
+
+[tasks."build:mobile"]
+description = "モバイルアプリのみビルド"
+run = "pnpm --filter @repo/mobile build"
+
+[tasks."build:packages"]
+description = "共有パッケージのみビルド"
+run = "pnpm turbo run build --filter='./packages/*'"
+
+# ============================================
+# コード品質
+# ============================================
+
+[tasks.lint]
+description = "Biomeでリント実行"
+run = "pnpm biome lint ."
+
+[tasks."lint:fix"]
+description = "Biomeでリント実行（自動修正）"
+run = "pnpm biome lint --write ."
+
+[tasks.format]
+description = "Biomeでフォーマット"
+run = "pnpm biome format --write ."
+
+[tasks.check]
+description = "Biomeでチェック（lint + format）"
+run = "pnpm biome check ."
+
+[tasks."check:fix"]
+description = "Biomeでチェック（自動修正）"
+run = "pnpm biome check --write ."
+
+[tasks.typecheck]
+description = "TypeScriptの型チェック"
+run = "pnpm turbo run typecheck"
+
+# ============================================
+# コード生成
+# ============================================
+
+[tasks.generate]
+description = "OpenAPI/クライアントコード生成"
+run = "pnpm turbo run generate"
+
+[tasks."generate:spec"]
+description = "specパッケージのコード生成"
+run = "pnpm --filter @repo/spec generate"
+
+# ============================================
+# クリーンアップ
+# ============================================
+
+[tasks.clean]
+description = "全distフォルダを削除"
+run = "pnpm turbo run clean"
+
+[tasks."clean:all"]
+description = "dist + node_modulesを削除"
+run = "pnpm turbo run clean && rm -rf node_modules **/node_modules"
+
+# ============================================
+# Capacitor (モバイル)
+# ============================================
+
+[tasks."cap:add:ios"]
+description = "iOSプロジェクトを追加"
+run = "pnpm --filter @repo/mobile cap:add:ios"
+
+[tasks."cap:add:android"]
+description = "Androidプロジェクトを追加"
+run = "pnpm --filter @repo/mobile cap:add:android"
+
+[tasks."cap:sync"]
+description = "Capacitorの同期"
+run = "pnpm --filter @repo/mobile cap:sync"
+
+[tasks."cap:ios"]
+description = "iOSプロジェクトを開く"
+run = "pnpm --filter @repo/mobile cap:open:ios"
+
+[tasks."cap:android"]
+description = "Androidプロジェクトを開く"
+run = "pnpm --filter @repo/mobile cap:open:android"
+
+# ============================================
+# ユーティリティ
+# ============================================
+
+[tasks.install]
+description = "依存関係をインストール"
+run = "pnpm install"
+
+[tasks.lint-staged]
+description = "lint-staged実行（pre-commit用）"
+run = "pnpm lint-staged"
+
+[tasks.preview]
+description = "Webアプリのプレビュー"
+run = "pnpm --filter @repo/web preview"
+
+[tasks."preview:mobile"]
+description = "モバイルアプリのプレビュー"
+run = "pnpm --filter @repo/mobile preview"
+
+# ============================================
+# Storybook
+# ============================================
+
+[tasks.storybook]
+description = "Storybookを起動"
+run = "pnpm turbo run storybook"
+
+[tasks."storybook:build"]
+description = "Storybookをビルド"
+run = "pnpm turbo run build-storybook"
+
+# ============================================
+# Docker Compose
+# ============================================
+
+[tasks."docker:up"]
+description = "Docker Composeでサービスを起動"
+run = "docker compose up -d"
+
+[tasks."docker:down"]
+description = "Docker Composeでサービスを停止"
+run = "docker compose down"
+
+[tasks."docker:logs"]
+description = "Docker Composeのログを表示"
+run = "docker compose logs -f"
+
+[tasks."docker:restart"]
+description = "Docker Composeでサービスを再起動"
+run = "docker compose restart"
+
+# ============================================
+# DynamoDB
+# ============================================
+
+[tasks."dynamodb:init"]
+description = "DynamoDBテーブルを初期化"
+depends = ["docker:up"]
+run = "sleep 2 && pnpm --filter @repo/infrastructure dynamodb:init"

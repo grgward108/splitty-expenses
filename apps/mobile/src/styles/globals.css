@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 15 23 42;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+    --border: 226 232 240;
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
+  }
+
+  .dark {
+    --background: 15 23 42;
+    --foreground: 248 250 252;
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
+    --border: 51 65 85;
+    --muted: 30 41 59;
+    --muted-foreground: 148 163 184;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-white text-secondary-900 transition-colors duration-200;
+  }
+
+  .dark body {
+    @apply bg-secondary-950 text-secondary-50;
+  }
+}
+
+/* Custom styles for Ionic + Tailwind integration */
+ion-content {
+  --background: transparent;
+}
+
+.dark ion-content {
+  --background: transparent;
+}
+
+ion-page {
+  @apply bg-white transition-colors duration-200;
+}
+
+.dark ion-page {
+  @apply bg-secondary-950;
+}
+
+/* Tab bar styling */
+ion-tab-bar {
+  --background: white;
+  --border: rgb(226 232 240);
+}
+
+.dark ion-tab-bar {
+  --background: rgb(15 23 42);
+  --border: rgb(51 65 85);
+}
+
+ion-tab-button {
+  --color: rgb(100 116 139);
+  --color-selected: rgb(37 99 235);
+}
+
+.dark ion-tab-button {
+  --color: rgb(148 163 184);
+  --color-selected: rgb(96 165 250);
+}
+
+/* Safe area handling */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}

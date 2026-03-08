@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+mise run lint-staged
+mise run build
