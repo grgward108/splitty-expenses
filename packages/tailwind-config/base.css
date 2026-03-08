@@ -1,0 +1,28 @@
+/**
+ * セマンティックな CSS 変数（背景・前景・カード等）の共有定義。
+ * 値は packages/tailwind-config/tokens.js の semanticTokens と一致させる。
+ */
+
+@layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 24 24 27;
+    --card: 255 255 255;
+    --card-foreground: 24 24 27;
+    --border: 228 228 231;
+    --muted: 244 244 245;
+    --muted-foreground: 113 113 122;
+    --primary-500: 255 112 0;
+  }
+
+  .dark {
+    --background: 9 9 11;
+    --foreground: 250 250 250;
+    --card: 24 24 27;
+    --card-foreground: 250 250 250;
+    --border: 63 63 70;
+    --muted: 24 24 27;
+    --muted-foreground: 161 161 170;
+    --primary-500: 255 112 0;
+  }
+}

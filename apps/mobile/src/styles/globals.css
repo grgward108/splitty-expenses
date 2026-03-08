@@ -1,28 +1,8 @@
+@import "@repo/tailwind-config/base.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer base {
-  :root {
-    --background: 255 255 255;
-    --foreground: 15 23 42;
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
-    --border: 226 232 240;
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
-  }
-
-  .dark {
-    --background: 15 23 42;
-    --foreground: 248 250 252;
-    --card: 30 41 59;
-    --card-foreground: 248 250 252;
-    --border: 51 65 85;
-    --muted: 30 41 59;
-    --muted-foreground: 148 163 184;
-  }
-}
 
 @layer base {
   body {
@@ -51,25 +31,25 @@ ion-page {
   @apply bg-secondary-950;
 }
 
-/* Tab bar styling */
+/* Tab bar styling - 色は base.css の CSS 変数（tokens.js 由来）を参照 */
 ion-tab-bar {
-  --background: white;
-  --border: rgb(226 232 240);
+  --background: rgb(var(--background));
+  --border: rgb(var(--border));
 }
 
 .dark ion-tab-bar {
-  --background: rgb(15 23 42);
-  --border: rgb(51 65 85);
+  --background: rgb(var(--background));
+  --border: rgb(var(--border));
 }
 
 ion-tab-button {
-  --color: rgb(100 116 139);
-  --color-selected: rgb(37 99 235);
+  --color: rgb(var(--muted-foreground));
+  --color-selected: rgb(var(--primary-500));
 }
 
 .dark ion-tab-button {
-  --color: rgb(148 163 184);
-  --color-selected: rgb(96 165 250);
+  --color: rgb(var(--muted-foreground));
+  --color-selected: rgb(var(--primary-500));
 }
 
 /* Safe area handling */
