@@ -6,6 +6,7 @@
   "main": "./index.js",
   "exports": {
     ".": "./index.js",
+    "./base.css": "./base.css",
     "./postcss": "./postcss.config.js"
   },
   "dependencies": {
