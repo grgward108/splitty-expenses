@@ -1,11 +1,11 @@
 import { zValidator } from "@hono/zod-validator";
 import { Task } from "@repo/core";
-import { DynamoDBTaskRepository } from "@repo/infrastructure";
+import { DrizzleTaskRepository } from "@repo/infrastructure";
 import { createFactory } from "hono/factory";
 import type { TasksCreateContext } from "../generated/endpoints/tasks/tasks.context";
 import { tasksCreateBody } from "../generated/endpoints/tasks/tasks.zod";
 
-const taskRepository = new DynamoDBTaskRepository();
+const taskRepository = new DrizzleTaskRepository();
 const factory = createFactory();
 
 export const tasksCreateHandlers = factory.createHandlers(

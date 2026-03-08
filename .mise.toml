@@ -5,11 +5,7 @@ pnpm = "9"
 [env]
 NODE_ENV = "development"
 VITE_API_BASE_URL = "http://localhost:3000"
-DYNAMODB_ENDPOINT = "http://localhost:8000"
-AWS_REGION = "us-east-1"
-AWS_ACCESS_KEY_ID = "dummy"
-AWS_SECRET_ACCESS_KEY = "dummy"
-DYNAMODB_TABLE_NAME = "tasks"
+# DATABASE_URL と POSTGRES_PASSWORD は .mise.local.toml で設定（.mise.local.toml.example をコピー）
 
 # ============================================
 # 開発タスク
@@ -17,12 +13,12 @@ DYNAMODB_TABLE_NAME = "tasks"
 
 [tasks.dev]
 description = "全アプリの開発サーバーを起動"
-depends = ["dynamodb:init"]
+depends = ["db:migrate"]
 run = "pnpm turbo run dev"
 
 [tasks."dev:api"]
 description = "APIサーバーのみ起動"
-depends = ["dynamodb:init"]
+depends = ["db:migrate"]
 run = "pnpm --filter @repo/api dev"
 
 [tasks."dev:web"]
@@ -186,10 +182,18 @@ description = "Docker Composeでサービスを再起動"
 run = "docker compose restart"
 
 # ============================================
-# DynamoDB
+# PostgreSQL / データベース
 # ============================================
 
-[tasks."dynamodb:init"]
-description = "DynamoDBテーブルを初期化"
+[tasks."db:migrate"]
+description = "PostgreSQLマイグレーションを実行"
 depends = ["docker:up"]
-run = "sleep 2 && pnpm --filter @repo/infrastructure dynamodb:init"
+run = "sleep 2 && pnpm --filter @repo/infrastructure db:migrate"
+
+[tasks."db:generate"]
+description = "Drizzleマイグレーションファイルを生成"
+run = "pnpm --filter @repo/infrastructure db:generate"
+
+[tasks."db:studio"]
+description = "Drizzle Studioを起動"
+run = "pnpm --filter @repo/infrastructure db:studio"

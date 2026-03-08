@@ -1,29 +1,17 @@
 version: '3.8'
 
 services:
-  dynamodb-local:
-    image: amazon/dynamodb-local:latest
-    container_name: dynamodb-local
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-local
     ports:
-      - "8000:8000"
-    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data"
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
+      POSTGRES_DB: ${POSTGRES_DB:-app_dev}
     volumes:
-      - "./dynamodb-data:/home/dynamodblocal/data"
-    working_dir: /home/dynamodblocal
-    environment:
-      - AWS_ACCESS_KEY_ID=dummy
-      - AWS_SECRET_ACCESS_KEY=dummy
-      - AWS_DEFAULT_REGION=ap-northeast-1
+      - postgres-data:/var/lib/postgresql/data
 
-  dynamodb-admin:
-    image: aaronshaf/dynamodb-admin
-    container_name: dynamodb-admin
-    ports:
-      - "8001:8001"
-    environment:
-      - DYNAMO_ENDPOINT=http://dynamodb-local:8000
-      - AWS_REGION=ap-northeast-1
-      - AWS_ACCESS_KEY_ID=dummy
-      - AWS_SECRET_ACCESS_KEY=dummy
-    depends_on:
-      - dynamodb-local
+volumes:
+  postgres-data:
