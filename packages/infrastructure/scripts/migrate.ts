@@ -5,7 +5,7 @@ import postgres from "postgres";
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
   console.error(
-    "DATABASE_URL is not set. Copy .mise.local.toml.example to .mise.local.toml and set DATABASE_URL."
+    "DATABASE_URL is not set. Run with `mise run db:migrate` so .mise.local.toml is loaded."
   );
   process.exit(1);
 }
