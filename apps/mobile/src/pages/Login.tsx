@@ -1,45 +1,10 @@
-import { authClient } from "@/lib/auth-client";
 import { IonContent, IonPage } from "@ionic/react";
 import { Button, Text } from "@repo/ui";
-import { useEffect } from "react";
-import { useHistory } from "react-router-dom";
+
+import { useAuth } from "@/hooks/use-auth";
 
 function LoginPage() {
-  const history = useHistory();
-  const { data: session, isPending } = authClient.useSession();
-
-  useEffect(() => {
-    if (!isPending && session?.user) {
-      history.replace("/tasks");
-    }
-  }, [session, isPending, history]);
-
-  const handleSignInWithGoogle = () => {
-    const base =
-      typeof window !== "undefined" && window.location?.origin
-        ? window.location.origin
-        : "http://localhost:8100";
-    authClient.signIn.social({
-      provider: "google",
-      callbackURL: `${base}/tasks`,
-    });
-  };
-
-  if (isPending) {
-    return (
-      <IonPage>
-        <IonContent fullscreen className="ion-padding">
-          <div className="flex min-h-[50vh] items-center justify-center">
-            <Text color="muted">読み込み中...</Text>
-          </div>
-        </IonContent>
-      </IonPage>
-    );
-  }
-
-  if (session?.user) {
-    return null;
-  }
+  const { signInWithGoogle } = useAuth();
 
   return (
     <IonPage>
@@ -51,7 +16,7 @@ function LoginPage() {
           </Text>
           <Button
             variant="primary"
-            onClick={handleSignInWithGoogle}
+            onClick={signInWithGoogle}
             className="w-full max-w-xs rounded-xl"
           >
             Google でサインイン

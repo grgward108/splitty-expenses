@@ -1,10 +1,14 @@
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonContent, IonIcon, IonPage } from "@ionic/react";
 import { Alert, AlertDescription, AlertTitle, Button, Card, Heading, Switch, Text } from "@repo/ui";
-import { camera, moon, sunny } from "ionicons/icons";
+import { camera, logOutOutline, moon, sunny } from "ionicons/icons";
 import { useEffect, useState } from "react";
 
+import { useAuth } from "@/hooks/use-auth";
+
 function SettingsPage() {
+  const { signOut } = useAuth();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("darkMode");
@@ -42,6 +46,15 @@ function SettingsPage() {
       message: `ダークモードが${newValue ? "有効" : "無効"}になりました。`,
     });
     setTimeout(() => setAlertMessage(null), 3000);
+  };
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+    } catch {
+      setIsSigningOut(false);
+    }
   };
 
   const handleTakePhoto = async () => {
@@ -155,6 +168,37 @@ function SettingsPage() {
                   </div>
                 )}
               </div>
+            </Card>
+          </section>
+          <section className="space-y-3">
+            <Heading
+              level={4}
+              className="px-1 text-secondary-500 dark:text-secondary-400 uppercase text-xs tracking-widest font-bold"
+            >
+              アカウント
+            </Heading>
+            <Card variant="modern" className="overflow-hidden p-4">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg shadow-red-500/25">
+                  <IonIcon icon={logOutOutline} className="text-2xl" />
+                </div>
+                <div>
+                  <Text weight="semibold" className="text-secondary-900 dark:text-secondary-100">
+                    サインアウト
+                  </Text>
+                  <Text size="sm" color="muted">
+                    Google アカウントからサインアウト
+                  </Text>
+                </div>
+              </div>
+              <Button
+                variant="destructive"
+                onClick={handleSignOut}
+                disabled={isSigningOut}
+                className="w-full"
+              >
+                {isSigningOut ? "サインアウト中..." : "サインアウト"}
+              </Button>
             </Card>
           </section>
           {alertMessage && (

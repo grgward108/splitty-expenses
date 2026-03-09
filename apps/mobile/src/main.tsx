@@ -1,11 +1,8 @@
-import { setBaseUrl } from "@repo/spec/fetcher";
+import { setAuthToken, setBaseUrl } from "@repo/spec/fetcher";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-
-// Configure API base URL from environment variable
-setBaseUrl(import.meta.env.VITE_API_BASE_URL || "http://localhost:3000");
+import { getToken } from "./lib/token-storage";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -44,12 +41,31 @@ const queryClient = new QueryClient({
   },
 });
 
-const rootElement = document.getElementById("root")!;
-
-createRoot(rootElement).render(
-  <StrictMode>
+function renderApp() {
+  const rootElement = document.getElementById("root")!;
+  createRoot(rootElement).render(
     <QueryClientProvider client={queryClient}>
       <App />
     </QueryClientProvider>
-  </StrictMode>
-);
+  );
+}
+
+async function init() {
+  // API ベース URL を設定
+  setBaseUrl(import.meta.env.VITE_API_BASE_URL || "http://localhost:3000");
+
+  try {
+    // Preferences から保存済みセッショントークンを復元し、
+    // React レンダリング前にメモリに設定することでセッション取得を確実にする
+    const token = await getToken();
+    if (token) {
+      setAuthToken(token);
+    }
+  } catch {
+    // Preferences の読み込みに失敗してもアプリのレンダリングは継続する
+  }
+
+  renderApp();
+}
+
+init();

@@ -4,12 +4,19 @@
  */
 
 let baseUrl = "http://localhost:3000";
+let authToken: string | null = null;
 
 export const setBaseUrl = (url: string) => {
   baseUrl = url;
 };
 
 export const getBaseUrl = () => baseUrl;
+
+export const setAuthToken = (token: string | null): void => {
+  authToken = token;
+};
+
+export const getAuthToken = (): string | null => authToken;
 
 export const customFetch = async <T>(url: string, options?: RequestInit): Promise<T> => {
   const fullUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
@@ -21,6 +28,7 @@ export const customFetch = async <T>(url: string, options?: RequestInit): Promis
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
+        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...options?.headers,
       },
     });
