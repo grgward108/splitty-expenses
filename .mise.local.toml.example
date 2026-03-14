@@ -13,3 +13,12 @@ BETTER_AUTH_URL = "http://localhost:3000"
 # Google OAuth（Google でサインインする場合）
 GOOGLE_CLIENT_ID = ""
 GOOGLE_CLIENT_SECRET = ""
+
+# --- Cloudflare デプロイ用 ---
+# wrangler deploy に必要な認証情報
+CLOUDFLARE_API_TOKEN = ""
+CLOUDFLARE_ACCOUNT_ID = ""
+
+# Hyperdrive 設定 ID（wrangler hyperdrive create で生成される）
+# 例: wrangler hyperdrive create monorepo-db --connection-string="$DATABASE_URL"
+# HYPERDRIVE_ID = ""
