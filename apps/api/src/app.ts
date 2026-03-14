@@ -10,8 +10,24 @@ import generatedRoutes from "./generated/routes";
 type Auth = ReturnType<typeof getAuth>;
 type AuthUser = Auth["$Infer"]["Session"]["user"];
 type AuthSession = Auth["$Infer"]["Session"]["session"];
+type AppBindings = {
+  HYPERDRIVE?: {
+    connectionString?: string;
+  };
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  BETTER_AUTH_URL?: string;
+};
+
+const trustedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:8100",
+  "capacitor://localhost",
+  "https://localhost",
+];
 
 const app = new Hono<{
+  Bindings: AppBindings;
   Variables: {
     user: AuthUser | null;
     session: AuthSession | null;
@@ -26,12 +42,7 @@ app.use("*", prettyJSON());
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:8100",
-      "capacitor://localhost",
-      "https://localhost",
-    ],
+    origin: trustedOrigins,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -41,12 +52,7 @@ app.use(
 // db・auth 遅延初期化ミドルウェア
 // Node.js では process.env、Workers では c.env (Hyperdrive バインディング) から接続文字列を取得
 app.use("*", async (c, next) => {
-  const connectionString =
-    (c.env as Record<string, unknown>)?.HYPERDRIVE &&
-    typeof ((c.env as Record<string, unknown>).HYPERDRIVE as Record<string, unknown>)
-      ?.connectionString === "string"
-      ? ((c.env as Record<string, unknown>).HYPERDRIVE as Record<string, string>).connectionString
-      : process.env.DATABASE_URL;
+  const connectionString = c.env.HYPERDRIVE?.connectionString ?? process.env.DATABASE_URL;
 
   if (!connectionString) {
     return c.json({ message: "DATABASE_URL is not configured", code: "CONFIG_ERROR" }, 500);
@@ -55,18 +61,9 @@ app.use("*", async (c, next) => {
   const db = getDb(connectionString);
   const auth = getAuth({
     db,
-    googleClientId:
-      (c.env as Record<string, string>)?.GOOGLE_CLIENT_ID ?? process.env.GOOGLE_CLIENT_ID ?? "",
-    googleClientSecret:
-      (c.env as Record<string, string>)?.GOOGLE_CLIENT_SECRET ??
-      process.env.GOOGLE_CLIENT_SECRET ??
-      "",
-    trustedOrigins: [
-      "http://localhost:5173",
-      "http://localhost:8100",
-      "capacitor://localhost",
-      "https://localhost",
-    ],
+    googleClientId: c.env.GOOGLE_CLIENT_ID ?? process.env.GOOGLE_CLIENT_ID ?? "",
+    googleClientSecret: c.env.GOOGLE_CLIENT_SECRET ?? process.env.GOOGLE_CLIENT_SECRET ?? "",
+    trustedOrigins,
   });
 
   c.set("db", db);
@@ -87,10 +84,7 @@ app.use("*", async (c, next) => {
 // システムブラウザで Google OAuth を開始し、ディープリンクでトークンを返す
 app.get("/api/auth/mobile/google", async (c) => {
   const auth = c.get("auth");
-  const baseUrl =
-    (c.env as Record<string, string>)?.BETTER_AUTH_URL ??
-    process.env.BETTER_AUTH_URL ??
-    "http://localhost:3000";
+  const baseUrl = c.env.BETTER_AUTH_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
   const callbackURL = `${baseUrl}/api/auth/mobile/callback`;
 
   const authReq = new Request(`${baseUrl}/api/auth/sign-in/social`, {

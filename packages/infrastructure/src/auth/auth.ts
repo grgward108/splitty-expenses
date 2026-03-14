@@ -11,8 +11,15 @@ export interface AuthConfig {
   trustedOrigins: string[];
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: Better Auth の型推論が複雑なため any でキャッシュ
-let cachedAuth: any = null;
+const cachedAuthByDb = new WeakMap<DrizzleDatabase, Map<string, unknown>>();
+
+function getAuthCacheKey(config: Omit<AuthConfig, "db">): string {
+  return JSON.stringify({
+    googleClientId: config.googleClientId,
+    googleClientSecret: config.googleClientSecret,
+    trustedOrigins: [...config.trustedOrigins].sort(),
+  });
+}
 
 /**
  * Better Auth インスタンスを取得する。同一プロセス内ではキャッシュされたインスタンスを返す。
@@ -21,26 +28,37 @@ let cachedAuth: any = null;
  * - Cloudflare Workers: `getAuth({ db: getDb(c.env.HYPERDRIVE.connectionString), ... })`
  */
 export function getAuth(config: AuthConfig) {
-  if (!cachedAuth) {
-    cachedAuth = betterAuth({
-      database: drizzleAdapter(config.db, {
-        provider: "pg",
-        schema: {
-          user: schema.user,
-          session: schema.session,
-          account: schema.account,
-          verification: schema.verification,
-        },
-      }),
-      plugins: [bearer()],
-      socialProviders: {
-        google: {
-          clientId: config.googleClientId,
-          clientSecret: config.googleClientSecret,
-        },
-      },
-      trustedOrigins: config.trustedOrigins,
-    });
+  const cacheKey = getAuthCacheKey(config);
+  let authByConfig = cachedAuthByDb.get(config.db);
+  if (!authByConfig) {
+    authByConfig = new Map<string, unknown>();
+    cachedAuthByDb.set(config.db, authByConfig);
   }
-  return cachedAuth;
+
+  const cachedAuth = authByConfig.get(cacheKey);
+  if (cachedAuth) {
+    return cachedAuth as ReturnType<typeof betterAuth>;
+  }
+
+  const auth = betterAuth({
+    database: drizzleAdapter(config.db, {
+      provider: "pg",
+      schema: {
+        user: schema.user,
+        session: schema.session,
+        account: schema.account,
+        verification: schema.verification,
+      },
+    }),
+    plugins: [bearer()],
+    socialProviders: {
+      google: {
+        clientId: config.googleClientId,
+        clientSecret: config.googleClientSecret,
+      },
+    },
+    trustedOrigins: config.trustedOrigins,
+  });
+  authByConfig.set(cacheKey, auth);
+  return auth;
 }

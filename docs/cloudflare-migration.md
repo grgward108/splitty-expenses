@@ -78,13 +78,17 @@ export const db = drizzle(client, { schema });         // ← グローバルな
 **移行後（ファクトリ関数）:**
 ```typescript
 // import 時には何も実行されない。呼び出し側がいつ・どの設定で生成するか決める。
-let cachedDb: ReturnType<typeof drizzle> | null = null;
+const cachedDbByConnectionString = new Map<string, ReturnType<typeof drizzle>>();
 
 export function getDb(connectionString: string) {
-  if (!cachedDb) {
-    cachedDb = drizzle(postgres(connectionString), { schema });
+  const cachedDb = cachedDbByConnectionString.get(connectionString);
+  if (cachedDb) {
+    return cachedDb;
   }
-  return cachedDb;
+
+  const db = drizzle(postgres(connectionString), { schema });
+  cachedDbByConnectionString.set(connectionString, db);
+  return db;
 }
 ```
 
@@ -111,13 +115,26 @@ export const auth = betterAuth({
 
 **移行後（ファクトリ関数）:**
 ```typescript
+const cachedAuthByDb = new WeakMap<DrizzleDatabase, Map<string, ReturnType<typeof betterAuth>>>();
+
 export function getAuth(config: {
-  db: ReturnType<typeof drizzle>;
+  db: DrizzleDatabase;
   googleClientId: string;
   googleClientSecret: string;
   trustedOrigins: string[];
 }) {
-  return betterAuth({
+  const key = JSON.stringify({
+    googleClientId: config.googleClientId,
+    googleClientSecret: config.googleClientSecret,
+    trustedOrigins: [...config.trustedOrigins].sort(),
+  });
+
+  const cache = cachedAuthByDb.get(config.db) ?? new Map();
+  cachedAuthByDb.set(config.db, cache);
+
+  if (cache.has(key)) return cache.get(key);
+
+  const auth = betterAuth({
     database: drizzleAdapter(config.db, { provider: "pg", ... }),
     socialProviders: {
       google: {
@@ -127,6 +144,9 @@ export function getAuth(config: {
     },
     trustedOrigins: config.trustedOrigins,
   });
+
+  cache.set(key, auth);
+  return auth;
 }
 ```
 

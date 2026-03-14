@@ -4,7 +4,7 @@ import * as schema from "./schema.js";
 
 export type DrizzleDatabase = PostgresJsDatabase<typeof schema>;
 
-let cachedDb: DrizzleDatabase | null = null;
+const cachedDbByConnectionString = new Map<string, DrizzleDatabase>();
 
 /**
  * データベース接続を取得する。同一プロセス内ではキャッシュされたインスタンスを返す。
@@ -13,9 +13,13 @@ let cachedDb: DrizzleDatabase | null = null;
  * - Cloudflare Workers: `getDb(c.env.HYPERDRIVE.connectionString)`
  */
 export function getDb(connectionString: string): DrizzleDatabase {
-  if (!cachedDb) {
-    const client = postgres(connectionString);
-    cachedDb = drizzle(client, { schema });
+  const cachedDb = cachedDbByConnectionString.get(connectionString);
+  if (cachedDb) {
+    return cachedDb;
   }
-  return cachedDb;
+
+  const client = postgres(connectionString);
+  const db = drizzle(client, { schema });
+  cachedDbByConnectionString.set(connectionString, db);
+  return db;
 }
