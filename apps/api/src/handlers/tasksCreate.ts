@@ -5,7 +5,6 @@ import { createFactory } from "hono/factory";
 import type { TasksCreateContext } from "../generated/endpoints/tasks/tasks.context";
 import { tasksCreateBody } from "../generated/endpoints/tasks/tasks.zod";
 
-const taskRepository = new DrizzleTaskRepository();
 const factory = createFactory();
 
 export const tasksCreateHandlers = factory.createHandlers(
@@ -16,6 +15,8 @@ export const tasksCreateHandlers = factory.createHandlers(
       return c.json({ message: "Unauthorized", code: "UNAUTHORIZED" }, 401);
     }
 
+    const db = c.get("db");
+    const taskRepository = new DrizzleTaskRepository(db);
     const body = c.req.valid("json");
     const id = crypto.randomUUID();
 

@@ -1,14 +1,21 @@
-import { drizzle } from "drizzle-orm/postgres-js";
+import { type PostgresJsDatabase, drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema.js";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error(
-    "DATABASE_URL is not set. Run with `mise run …` so .mise.local.toml is loaded (e.g. mise run dev, mise run dev:api)."
-  );
+export type DrizzleDatabase = PostgresJsDatabase<typeof schema>;
+
+let cachedDb: DrizzleDatabase | null = null;
+
+/**
+ * データベース接続を取得する。同一プロセス内ではキャッシュされたインスタンスを返す。
+ *
+ * - Node.js: `getDb(process.env.DATABASE_URL)`
+ * - Cloudflare Workers: `getDb(c.env.HYPERDRIVE.connectionString)`
+ */
+export function getDb(connectionString: string): DrizzleDatabase {
+  if (!cachedDb) {
+    const client = postgres(connectionString);
+    cachedDb = drizzle(client, { schema });
+  }
+  return cachedDb;
 }
-
-const client = postgres(connectionString);
-
-export const db = drizzle(client, { schema });

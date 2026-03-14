@@ -2,15 +2,17 @@ import type { TaskRepository } from "@repo/core";
 import { Task, type TaskStatus } from "@repo/core";
 import type { PaginatedResult, PaginationParams, TaskId } from "@repo/core";
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "../database/drizzle.js";
+import type { DrizzleDatabase } from "../database/drizzle.js";
 import { tasks } from "../database/schema.js";
 
 /**
  * Drizzle/PostgreSQL implementation of TaskRepository (user-scoped)
  */
 export class DrizzleTaskRepository implements TaskRepository {
+  constructor(private db: DrizzleDatabase) {}
+
   async findById(userId: string, id: TaskId): Promise<Task | null> {
-    const [row] = await db
+    const [row] = await this.db
       .select()
       .from(tasks)
       .where(and(eq(tasks.id, String(id)), eq(tasks.userId, userId)))
@@ -24,13 +26,13 @@ export class DrizzleTaskRepository implements TaskRepository {
     const limit = params?.limit ?? 10;
     const offset = (page - 1) * limit;
 
-    const [countResult] = await db
+    const [countResult] = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(tasks)
       .where(eq(tasks.userId, userId));
     const total = countResult?.count ?? 0;
 
-    const rows = await db
+    const rows = await this.db
       .select()
       .from(tasks)
       .where(eq(tasks.userId, userId))
@@ -48,7 +50,7 @@ export class DrizzleTaskRepository implements TaskRepository {
   }
 
   async save(task: Task): Promise<Task> {
-    await db
+    await this.db
       .insert(tasks)
       .values({
         id: task.id,
@@ -74,7 +76,7 @@ export class DrizzleTaskRepository implements TaskRepository {
   }
 
   async delete(userId: string, id: TaskId): Promise<void> {
-    await db.delete(tasks).where(and(eq(tasks.id, String(id)), eq(tasks.userId, userId)));
+    await this.db.delete(tasks).where(and(eq(tasks.id, String(id)), eq(tasks.userId, userId)));
   }
 
   async findByStatus(
@@ -92,13 +94,13 @@ export class DrizzleTaskRepository implements TaskRepository {
     const limit = params?.limit ?? 10;
     const offset = (page - 1) * limit;
 
-    const countRows = await db
+    const countRows = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(tasks)
       .where(and(eq(tasks.userId, userId), eq(tasks.status, status)));
     const total = countRows[0]?.count ?? 0;
 
-    const rows = await db
+    const rows = await this.db
       .select()
       .from(tasks)
       .where(and(eq(tasks.userId, userId), eq(tasks.status, status)))
