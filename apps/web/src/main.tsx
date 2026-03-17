@@ -8,7 +8,7 @@ import { routeTree } from "./routeTree.gen";
 import "./styles/globals.css";
 
 // Configure API base URL from environment variable
-setBaseUrl(import.meta.env.VITE_API_BASE_URL || "http://localhost:3000");
+setBaseUrl(import.meta.env.VITE_API_BASE_URL ?? "");
 
 // Create a new router instance
 const router = createRouter({ routeTree });

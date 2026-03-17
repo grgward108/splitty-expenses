@@ -11,11 +11,13 @@ type Auth = ReturnType<typeof getAuth>;
 type AuthUser = Auth["$Infer"]["Session"]["user"];
 type AuthSession = Auth["$Infer"]["Session"]["session"];
 type AppBindings = {
+  DATABASE_URL?: string;
   HYPERDRIVE?: {
     connectionString?: string;
   };
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
+  BETTER_AUTH_SECRET?: string;
   BETTER_AUTH_URL?: string;
 };
 
@@ -52,7 +54,8 @@ app.use(
 // db・auth 遅延初期化ミドルウェア
 // Node.js では process.env、Workers では c.env (Hyperdrive バインディング) から接続文字列を取得
 app.use("*", async (c, next) => {
-  const connectionString = c.env.HYPERDRIVE?.connectionString ?? process.env.DATABASE_URL;
+  const connectionString =
+    c.env.HYPERDRIVE?.connectionString ?? c.env.DATABASE_URL ?? process.env.DATABASE_URL;
 
   if (!connectionString) {
     return c.json({ message: "DATABASE_URL is not configured", code: "CONFIG_ERROR" }, 500);
