@@ -1,0 +1,29 @@
+name = "monorepo-app"
+main = "src/worker.ts"
+compatibility_date = "2024-12-30"
+compatibility_flags = ["nodejs_compat"]
+
+# Serve the web SPA as static assets from the Worker
+[assets]
+directory = "../web/dist"
+
+# Hyperdrive binding for PostgreSQL (via Drizzle)
+# Create with: wrangler hyperdrive create monorepo-db --connection-string="postgres://..."
+# Then paste the ID below
+# [[hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "<hyperdrive-config-id>"
+
+# --- Staging ---
+[env.staging]
+name = "monorepo-app-staging"
+# [[env.staging.hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "<staging-hyperdrive-id>"
+
+# --- Production ---
+[env.production]
+name = "monorepo-app-production"
+# [[env.production.hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "<production-hyperdrive-id>"

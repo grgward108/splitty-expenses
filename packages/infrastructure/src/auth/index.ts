@@ -1,1 +1,1 @@
-export { auth } from "./auth.js";
+export { getAuth, type AuthConfig } from "./auth.js";

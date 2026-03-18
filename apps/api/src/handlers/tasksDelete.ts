@@ -4,7 +4,6 @@ import { createFactory } from "hono/factory";
 import type { TasksDeleteContext } from "../generated/endpoints/tasks/tasks.context";
 import { tasksDeleteParams } from "../generated/endpoints/tasks/tasks.zod";
 
-const taskRepository = new DrizzleTaskRepository();
 const factory = createFactory();
 
 export const tasksDeleteHandlers = factory.createHandlers(
@@ -15,6 +14,8 @@ export const tasksDeleteHandlers = factory.createHandlers(
       return c.json({ message: "Unauthorized", code: "UNAUTHORIZED" }, 401);
     }
 
+    const db = c.get("db");
+    const taskRepository = new DrizzleTaskRepository(db);
     const { id } = c.req.valid("param");
     const existing = await taskRepository.findById(user.id, id as never);
 

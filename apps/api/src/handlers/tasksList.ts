@@ -4,7 +4,6 @@ import { createFactory } from "hono/factory";
 import type { TasksListContext } from "../generated/endpoints/tasks/tasks.context";
 import { tasksListQueryParams } from "../generated/endpoints/tasks/tasks.zod";
 
-const taskRepository = new DrizzleTaskRepository();
 const factory = createFactory();
 
 export const tasksListHandlers = factory.createHandlers(
@@ -15,6 +14,8 @@ export const tasksListHandlers = factory.createHandlers(
       return c.json({ message: "Unauthorized", code: "UNAUTHORIZED" }, 401);
     }
 
+    const db = c.get("db");
+    const taskRepository = new DrizzleTaskRepository(db);
     const query = c.req.valid("query");
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;

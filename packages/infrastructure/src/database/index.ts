@@ -2,5 +2,5 @@
  * Database connection utilities
  */
 
-export * from "./drizzle.js";
+export { getDb, type DrizzleDatabase } from "./drizzle.js";
 export * from "./schema.js";

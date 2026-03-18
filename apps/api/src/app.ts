@@ -1,4 +1,4 @@
-import { auth } from "@repo/infrastructure";
+import { type DrizzleDatabase, getAuth, getDb } from "@repo/infrastructure";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -7,13 +7,34 @@ import { prettyJSON } from "hono/pretty-json";
 // 生成されたルートをインポート
 import generatedRoutes from "./generated/routes";
 
-type AuthUser = typeof auth.$Infer.Session.user;
-type AuthSession = typeof auth.$Infer.Session.session;
+type Auth = ReturnType<typeof getAuth>;
+type AuthUser = Auth["$Infer"]["Session"]["user"];
+type AuthSession = Auth["$Infer"]["Session"]["session"];
+type AppBindings = {
+  DATABASE_URL?: string;
+  HYPERDRIVE?: {
+    connectionString?: string;
+  };
+  GOOGLE_CLIENT_ID?: string;
+  GOOGLE_CLIENT_SECRET?: string;
+  BETTER_AUTH_SECRET?: string;
+  BETTER_AUTH_URL?: string;
+};
+
+const trustedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:8100",
+  "capacitor://localhost",
+  "https://localhost",
+];
 
 const app = new Hono<{
+  Bindings: AppBindings;
   Variables: {
     user: AuthUser | null;
     session: AuthSession | null;
+    db: DrizzleDatabase;
+    auth: Auth;
   };
 }>();
 
@@ -23,20 +44,39 @@ app.use("*", prettyJSON());
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:8100",
-      "capacitor://localhost",
-      "https://localhost",
-    ],
+    origin: trustedOrigins,
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
+// db・auth 遅延初期化ミドルウェア
+// Node.js では process.env、Workers では c.env (Hyperdrive バインディング) から接続文字列を取得
+app.use("*", async (c, next) => {
+  const connectionString =
+    c.env.HYPERDRIVE?.connectionString ?? c.env.DATABASE_URL ?? process.env.DATABASE_URL;
+
+  if (!connectionString) {
+    return c.json({ message: "DATABASE_URL is not configured", code: "CONFIG_ERROR" }, 500);
+  }
+
+  const db = getDb(connectionString);
+  const auth = getAuth({
+    db,
+    googleClientId: c.env.GOOGLE_CLIENT_ID ?? process.env.GOOGLE_CLIENT_ID ?? "",
+    googleClientSecret: c.env.GOOGLE_CLIENT_SECRET ?? process.env.GOOGLE_CLIENT_SECRET ?? "",
+    trustedOrigins,
+  });
+
+  c.set("db", db);
+  c.set("auth", auth);
+  await next();
+});
+
 // セッションミドルウェア（全ルートで c.get("user") / c.get("session") を利用可能に）
 app.use("*", async (c, next) => {
+  const auth = c.get("auth");
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
   c.set("user", session?.user ?? null);
   c.set("session", session?.session ?? null);
@@ -46,7 +86,8 @@ app.use("*", async (c, next) => {
 // モバイル OAuth エンドポイント（better-auth の /api/auth/* ワイルドカードより前に登録する）
 // システムブラウザで Google OAuth を開始し、ディープリンクでトークンを返す
 app.get("/api/auth/mobile/google", async (c) => {
-  const baseUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  const auth = c.get("auth");
+  const baseUrl = c.env.BETTER_AUTH_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
   const callbackURL = `${baseUrl}/api/auth/mobile/callback`;
 
   const authReq = new Request(`${baseUrl}/api/auth/sign-in/social`, {
@@ -87,6 +128,7 @@ app.get("/api/auth/mobile/google", async (c) => {
 
 // Google OAuth 完了後のコールバック: セッショントークンをディープリンクでアプリに渡す
 app.get("/api/auth/mobile/callback", async (c) => {
+  const auth = c.get("auth");
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
   if (!session?.session?.token) {
@@ -99,6 +141,7 @@ app.get("/api/auth/mobile/callback", async (c) => {
 
 // Better Auth ハンドラー（/api/auth/* へのその他すべてのリクエストを処理）
 app.on(["POST", "GET"], "/api/auth/*", (c) => {
+  const auth = c.get("auth");
   return auth.handler(c.req.raw);
 });
 

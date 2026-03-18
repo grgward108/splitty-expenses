@@ -182,6 +182,25 @@ description = "Docker Composeでサービスを再起動"
 run = "docker compose restart"
 
 # ============================================
+# Cloudflare デプロイ
+# ============================================
+
+[tasks."deploy:staging"]
+description = "Staging 環境にデプロイ（API + Web）"
+depends = ["build"]
+run = "cd apps/api && pnpm wrangler deploy --env staging"
+
+[tasks."deploy:production"]
+description = "Production 環境にデプロイ（API + Web）"
+depends = ["build"]
+run = "cd apps/api && pnpm wrangler deploy --env production"
+
+[tasks."deploy:dev"]
+description = "Wrangler でローカル Workers 環境を起動（動作確認用）"
+depends = ["build"]
+run = "cd apps/api && pnpm wrangler dev"
+
+# ============================================
 # PostgreSQL / データベース
 # ============================================
 
