@@ -1,4 +1,5 @@
 import { authClient } from "@/lib/auth-client";
+import { useTranslation } from "@repo/i18n";
 import { Button, Card, CardContent, CardFooter, CardHeader, Heading, Text } from "@repo/ui";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
@@ -8,6 +9,8 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
+  const { t } = useTranslation("auth");
+  const { t: tCommon } = useTranslation("common");
   const navigate = useNavigate();
   const { data: session, isPending } = authClient.useSession();
 
@@ -28,7 +31,7 @@ function LoginPage() {
   if (isPending) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <Text color="muted">読み込み中...</Text>
+        <Text color="muted">{tCommon("loading")}</Text>
       </div>
     );
   }
@@ -41,9 +44,9 @@ function LoginPage() {
     <div className="flex min-h-[80vh] items-center justify-center px-4">
       <Card className="w-full max-w-md" variant="glass">
         <CardHeader className="space-y-2 text-center">
-          <Heading level={2}>おかえりなさい</Heading>
+          <Heading level={2}>{t("welcomeBack")}</Heading>
           <Text color="muted" size="sm">
-            アカウントにログインして続行してください
+            {t("signInToContinue")}
           </Text>
         </CardHeader>
         <CardContent className="flex flex-col space-y-4 pt-4">
@@ -72,7 +75,7 @@ function LoginPage() {
               />
               <path d="M1 1h22v22H1z" fill="none" />
             </svg>
-            Google でサインイン
+            {t("signInWithGoogle")}
           </Button>
         </CardContent>
         <CardFooter className="flex justify-center pb-6" />

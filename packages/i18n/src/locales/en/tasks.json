@@ -1,0 +1,30 @@
+{
+  "pageTitle": "Tasks",
+  "addTask": "Add task",
+  "notFound": "No tasks found",
+  "dueDate": "Due: {{date}}",
+  "newTask": "New task",
+  "newTaskDescription": "Add a task to manage your work.",
+  "editTask": "Edit task",
+  "editTaskDescription": "Update the task details.",
+  "deleteTask": "Delete task",
+  "deleteTaskConfirm": "Are you sure you want to delete this task? This cannot be undone.",
+  "taskTitle": "Title",
+  "taskTitlePlaceholder": "e.g. Write the report",
+  "descriptionOptional": "Description (optional)",
+  "descriptionPlaceholder": "Enter task details...",
+  "status": "Status",
+  "createTask": "Create task",
+  "loadFailed": "Failed to load tasks",
+  "loadLoading": "Loading tasks...",
+  "myTasks": "My tasks",
+  "taskCount": "{{count}} tasks",
+  "emptyMobile": "No tasks yet",
+  "calendarIcon": "Calendar icon",
+  "addTaskAria": "Add task",
+  "statusLabels": {
+    "pending": "To do",
+    "in_progress": "In progress",
+    "completed": "Done"
+  }
+}

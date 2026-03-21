@@ -1,4 +1,5 @@
 import { authClient } from "@/lib/auth-client";
+import { useTranslation } from "@repo/i18n";
 import {
   Avatar,
   AvatarFallback,
@@ -18,6 +19,7 @@ export const Route = createRootRoute({
 });
 
 function RootLayout() {
+  const { t } = useTranslation("common");
   const { data: session, isPending } = authClient.useSession();
   const routerState = useRouterState();
   const isLoginPage = routerState.location.pathname === "/login";
@@ -43,7 +45,7 @@ function RootLayout() {
                   to={"/" as any}
                   className="text-xl font-bold text-primary-600 dark:text-primary-400"
                 >
-                  モノレポアプリ
+                  {t("appName")}
                 </Link>
               </div>
               <div className="flex items-center space-x-4">
@@ -51,7 +53,7 @@ function RootLayout() {
                   <div
                     className="flex items-center gap-3"
                     aria-busy="true"
-                    aria-label="ユーザー情報を読み込み中"
+                    aria-label={t("loadingUser")}
                   >
                     <Skeleton className="h-4 max-w-[12rem] sm:max-w-[16rem] w-32 sm:w-40 rounded-md" />
                     <AvatarSkeleton size="md" />
@@ -62,10 +64,10 @@ function RootLayout() {
                       <button
                         type="button"
                         className="flex items-center gap-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-                        aria-label="ユーザーメニューを開く"
+                        aria-label={t("openUserMenu")}
                       >
                         <span className="text-sm font-medium text-secondary-700 dark:text-secondary-300 truncate max-w-[12rem] sm:max-w-[16rem]">
-                          {session.user.name ?? session.user.email ?? "ユーザー"}
+                          {session.user.name ?? session.user.email ?? t("user")}
                         </span>
                         <Avatar
                           size="md"
@@ -87,7 +89,7 @@ function RootLayout() {
                     <DropdownMenuContent align="end" className="w-56">
                       <div className="px-3 py-2">
                         <p className="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate">
-                          {session.user.name ?? "ユーザー"}
+                          {session.user.name ?? t("user")}
                         </p>
                         <p className="text-xs text-secondary-500 dark:text-secondary-400 truncate">
                           {session.user.email}
@@ -96,10 +98,10 @@ function RootLayout() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link to="/settings" className="block">
-                          設定
+                          {t("settings")}
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleSignOut}>ログアウト</DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleSignOut}>{t("logout")}</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
@@ -107,7 +109,7 @@ function RootLayout() {
                     to="/login"
                     className="text-sm text-primary-600 hover:underline dark:text-primary-400"
                   >
-                    ログイン
+                    {t("login")}
                   </Link>
                 )}
               </div>

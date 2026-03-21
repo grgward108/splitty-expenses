@@ -1,3 +1,4 @@
+import { initI18n } from "@repo/i18n";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { StrictMode } from "react";
@@ -25,12 +26,14 @@ const queryClient = new QueryClient({
 
 const rootElement = document.getElementById("root")!;
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </ThemeProvider>
-  </StrictMode>
-);
+void initI18n({ defaultNS: "landing" }).then(() => {
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </ThemeProvider>
+    </StrictMode>
+  );
+});

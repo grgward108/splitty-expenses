@@ -11,6 +11,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@repo/i18n": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/spec": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
