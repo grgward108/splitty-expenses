@@ -25,7 +25,7 @@ import {
   Heading,
   Input,
   Label,
-  Skeleton,
+  PageLoader,
   Text,
   Textarea,
 } from "@repo/ui";
@@ -147,22 +147,7 @@ function TasksPage() {
     return (
       <IonPage>
         <IonContent fullscreen className="ion-padding">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <Skeleton className="h-8 w-32" />
-              <Skeleton className="h-10 w-28 rounded-xl" />
-            </div>
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Card key={i} className="p-4 border-none shadow-sm">
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-48" />
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
+          <PageLoader message="タスクを読み込み中..." />
         </IonContent>
       </IonPage>
     );

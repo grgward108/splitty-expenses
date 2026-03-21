@@ -118,7 +118,7 @@ import {
   tasksListQueryParams,
 } from "@repo/spec/hono/zod/tasks";
 
-app.post("/tasks", zValidator("json", tasksCreateBody), async (c) => {
+app.post("/api/tasks", zValidator("json", tasksCreateBody), async (c) => {
   const body = c.req.valid("json"); // Fully typed from OpenAPI spec
   // ...
 });
@@ -168,13 +168,13 @@ monorepo/
 
 ## Environment Variables
 
-- **`.mise.toml`**: 共通の環境変数（`NODE_ENV`, `VITE_API_BASE_URL` など）。リポジトリにコミットされます。
+- **`.mise.toml`**: 共通の環境変数（`NODE_ENV`, `BETTER_AUTH_URL` など）。リポジトリにコミットされます。
 - **`.mise.local.toml`**: ローカル専用の環境変数（`DATABASE_URL`, `POSTGRES_PASSWORD` など）。`.gitignore` されているためコミットされません。初回は `.mise.local.toml.example` をコピーして作成します。
 
 | Variable | Description |
 |----------|-------------|
 | `NODE_ENV` | 環境（.mise.toml） |
-| `VITE_API_BASE_URL` | API のベース URL（.mise.toml） |
+| `BETTER_AUTH_URL` | API のベース URL（.mise.toml） |
 | `DATABASE_URL` | PostgreSQL 接続文字列（.mise.local.toml） |
 | `POSTGRES_PASSWORD` | Docker Compose 用 PostgreSQL パスワード（.mise.local.toml） |
 

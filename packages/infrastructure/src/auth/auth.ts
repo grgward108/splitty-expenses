@@ -9,6 +9,10 @@ export interface AuthConfig {
   googleClientId: string;
   googleClientSecret: string;
   trustedOrigins: string[];
+  /** セッション・OAuth state 署名用。Cloudflare Workers では c.env から渡す（process.env に載らないことがある） */
+  secret?: string;
+  /** 公開 URL のオリジン（例: https://xxx.workers.dev）。コールバック URL・Cookie に影響 */
+  baseURL?: string;
 }
 
 const cachedAuthByDb = new WeakMap<DrizzleDatabase, Map<string, unknown>>();
@@ -18,29 +22,40 @@ function getAuthCacheKey(config: Omit<AuthConfig, "db">): string {
     googleClientId: config.googleClientId,
     googleClientSecret: config.googleClientSecret,
     trustedOrigins: [...config.trustedOrigins].sort(),
+    secret: config.secret ?? "",
+    baseURL: config.baseURL ?? "",
   });
 }
 
 /**
- * Better Auth インスタンスを取得する。同一プロセス内ではキャッシュされたインスタンスを返す。
+ * Better Auth インスタンスを取得する。
  *
- * - Node.js: `getAuth({ db: getDb(process.env.DATABASE_URL), ... })`
- * - Cloudflare Workers: `getAuth({ db: getDb(c.env.HYPERDRIVE.connectionString), ... })`
+ * - **Node + シングルトン DB**: 同一 `db` 参照に対して設定キーごとにキャッシュ（初期化コスト削減）
+ * - **Workers（リクエストごとに新しい db）**: `db` が毎回別インスタンスのため実質キャッシュされない
  */
 export function getAuth(config: AuthConfig) {
   const cacheKey = getAuthCacheKey(config);
   let authByConfig = cachedAuthByDb.get(config.db);
   if (!authByConfig) {
-    authByConfig = new Map<string, unknown>();
+    authByConfig = new Map();
     cachedAuthByDb.set(config.db, authByConfig);
   }
 
-  const cachedAuth = authByConfig.get(cacheKey);
-  if (cachedAuth) {
-    return cachedAuth as ReturnType<typeof betterAuth>;
+  const cached = authByConfig.get(cacheKey);
+  if (cached) {
+    return cached as ReturnType<typeof betterAuth>;
   }
 
   const auth = betterAuth({
+    ...(config.secret !== undefined ? { secret: config.secret } : {}),
+    ...(config.baseURL !== undefined ? { baseURL: config.baseURL } : {}),
+    session: {
+      cookieCache: {
+        enabled: true,
+        maxAge: 5 * 60,
+        strategy: "compact",
+      },
+    },
     database: drizzleAdapter(config.db, {
       provider: "pg",
       schema: {
@@ -59,6 +74,7 @@ export function getAuth(config: AuthConfig) {
     },
     trustedOrigins: config.trustedOrigins,
   });
+
   authByConfig.set(cacheKey, auth);
   return auth;
 }

@@ -1,5 +1,7 @@
 # このファイルを .mise.local.toml にコピーし、ローカル用の値を設定してください。
 # .mise.local.toml は .gitignore されており、コミットされません。
+#
+# staging/production 用の変数は .mise.staging.local.toml.example / .mise.production.local.toml.example を参照してください。
 
 [env]
 POSTGRES_PASSWORD = "your_local_password_here"

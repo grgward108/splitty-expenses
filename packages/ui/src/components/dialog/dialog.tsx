@@ -143,7 +143,7 @@ export const DialogClose = forwardRef<HTMLButtonElement, DialogCloseProps>(
       ref={ref}
       type="button"
       className={cn(
-        "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none",
+        "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none dark:ring-offset-secondary-950 dark:text-secondary-400 dark:hover:text-secondary-50",
         className
       )}
       {...props}

@@ -49,4 +49,4 @@ src/
 - 新規「認証必須」ページは `src/routes/_auth/<path>/route.tsx` を追加する。必要なら同階層に `route.model.ts` を置く。
 - 認証不要の新規ページは `src/routes/` 直下に `<path>/route.tsx` を追加する（例: `login/route.tsx`）。
 - ルート追加・削除後は `routeTree.gen.ts` が Vite ビルド時に自動生成される。手動で編集しない。
-- 環境変数 `VITE_API_BASE_URL` で API のベース URL を指定する（未指定時は `http://localhost:3000`）。
+- 環境変数 `BETTER_AUTH_URL` で API のベース URL を指定する（未指定時は `http://localhost:3000`）。

@@ -19,7 +19,7 @@ import {
   DialogTitle,
   Input,
   Label,
-  Spinner,
+  PageLoader,
   Textarea,
 } from "@repo/ui";
 import { createFileRoute } from "@tanstack/react-router";
@@ -118,11 +118,7 @@ function TasksPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner size="lg" />
-      </div>
-    );
+    return <PageLoader message="タスクを読み込み中..." />;
   }
 
   if (error) {

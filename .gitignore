@@ -24,6 +24,9 @@ Thumbs.db
 
 # mise local config (optional)
 .mise.local.toml
+mise.*.local.toml
+# 誤って .mise.staging.local.toml のようにドット付きにした場合もコミットされないようにする
+.mise.*.local.toml
 
 # Logs
 *.log

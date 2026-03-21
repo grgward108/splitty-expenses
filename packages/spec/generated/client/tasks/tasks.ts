@@ -68,7 +68,7 @@ export const getTasksListUrl = (params?: TasksListParams,) => {
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/tasks?${stringifiedParams}` : `/tasks`
+  return stringifiedParams.length > 0 ? `/api/tasks?${stringifiedParams}` : `/api/tasks`
 }
 
 export const tasksList = async (params?: TasksListParams, options?: RequestInit): Promise<tasksListResponse> => {
@@ -88,7 +88,7 @@ export const tasksList = async (params?: TasksListParams, options?: RequestInit)
 
 export const getTasksListQueryKey = (params?: TasksListParams,) => {
     return [
-    `/tasks`, ...(params ? [params]: [])
+    `/api/tasks`, ...(params ? [params]: [])
     ] as const;
     }
 
@@ -226,7 +226,7 @@ export const getTasksCreateUrl = () => {
 
   
 
-  return `/tasks`
+  return `/api/tasks`
 }
 
 export const tasksCreate = async (createTaskRequest: CreateTaskRequest, options?: RequestInit): Promise<tasksCreateResponse> => {
@@ -303,7 +303,7 @@ export const getTasksGetUrl = (id: string,) => {
 
   
 
-  return `/tasks/${id}`
+  return `/api/tasks/${id}`
 }
 
 export const tasksGet = async (id: string, options?: RequestInit): Promise<tasksGetResponse> => {
@@ -323,7 +323,7 @@ export const tasksGet = async (id: string, options?: RequestInit): Promise<tasks
 
 export const getTasksGetQueryKey = (id?: string,) => {
     return [
-    `/tasks/${id}`
+    `/api/tasks/${id}`
     ] as const;
     }
 
@@ -461,7 +461,7 @@ export const getTasksUpdateUrl = (id: string,) => {
 
   
 
-  return `/tasks/${id}`
+  return `/api/tasks/${id}`
 }
 
 export const tasksUpdate = async (id: string,
@@ -544,7 +544,7 @@ export const getTasksDeleteUrl = (id: string,) => {
 
   
 
-  return `/tasks/${id}`
+  return `/api/tasks/${id}`
 }
 
 export const tasksDelete = async (id: string, options?: RequestInit): Promise<tasksDeleteResponse> => {

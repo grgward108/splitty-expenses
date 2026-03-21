@@ -3,6 +3,7 @@ export { Button, type ButtonProps } from "./button";
 export { Card, CardHeader, CardContent, CardFooter, type CardProps } from "./card";
 export { Input, type InputProps } from "./input";
 export { Spinner, type SpinnerProps } from "./spinner";
+export { PageLoader, type PageLoaderProps } from "./page-loader";
 
 // Form components
 export { Label, type LabelProps } from "./label";
@@ -26,9 +27,12 @@ export {
   Avatar,
   AvatarImage,
   AvatarFallback,
+  AvatarSkeleton,
   type AvatarProps,
   type AvatarImageProps,
   type AvatarFallbackProps,
+  type AvatarSkeletonProps,
+  type AvatarSize,
 } from "./avatar";
 export { Skeleton, type SkeletonProps } from "./skeleton";
 export { Separator, type SeparatorProps } from "./separator";

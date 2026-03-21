@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+import { Avatar, AvatarFallback, AvatarImage, AvatarSkeleton } from "./avatar";
 
 const meta: Meta<typeof Avatar> = {
   title: "Components/Avatar",
@@ -42,6 +42,17 @@ export const Sizes: Story = {
       <Avatar size="xl">
         <AvatarFallback>XL</AvatarFallback>
       </Avatar>
+    </div>
+  ),
+};
+
+export const SkeletonSizes: StoryObj<typeof AvatarSkeleton> = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      <AvatarSkeleton size="sm" />
+      <AvatarSkeleton size="md" />
+      <AvatarSkeleton size="lg" />
+      <AvatarSkeleton size="xl" />
     </div>
   ),
 };
