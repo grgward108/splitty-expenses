@@ -1,25 +1,36 @@
 import { type HTMLAttributes, type ImgHTMLAttributes, forwardRef } from "react";
 import { cn } from "../../utils/cn";
+import { Skeleton, type SkeletonProps } from "../skeleton/skeleton";
+
+const avatarSizeBox = {
+  sm: "h-8 w-8",
+  md: "h-10 w-10",
+  lg: "h-12 w-12",
+  xl: "h-16 w-16",
+} as const;
+
+const avatarSizeText = {
+  sm: "text-xs",
+  md: "text-sm",
+  lg: "text-base",
+  xl: "text-lg",
+} as const;
+
+export type AvatarSize = keyof typeof avatarSizeBox;
 
 export interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: AvatarSize;
 }
 
 export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
   ({ className, size = "md", ...props }, ref) => {
-    const sizes = {
-      sm: "h-8 w-8 text-xs",
-      md: "h-10 w-10 text-sm",
-      lg: "h-12 w-12 text-base",
-      xl: "h-16 w-16 text-lg",
-    };
-
     return (
       <div
         ref={ref}
         className={cn(
           "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full",
-          sizes[size],
+          avatarSizeBox[size],
+          avatarSizeText[size],
           className
         )}
         {...props}
@@ -62,3 +73,19 @@ export const AvatarFallback = forwardRef<HTMLDivElement, AvatarFallbackProps>(
 );
 
 AvatarFallback.displayName = "AvatarFallback";
+
+export interface AvatarSkeletonProps extends Omit<SkeletonProps, "children"> {
+  size?: AvatarSize;
+}
+
+export const AvatarSkeleton = forwardRef<HTMLDivElement, AvatarSkeletonProps>(
+  ({ className, size = "md", ...props }, ref) => (
+    <Skeleton
+      ref={ref}
+      className={cn("shrink-0 rounded-full", avatarSizeBox[size], className)}
+      {...props}
+    />
+  )
+);
+
+AvatarSkeleton.displayName = "AvatarSkeleton";

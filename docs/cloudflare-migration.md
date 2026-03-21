@@ -218,10 +218,11 @@ main へ push    → production にデプロイ
 
 ## 環境セットアップ
 
-### シークレット (`wrangler secret put` で設定)
+### シークレット (`wrangler secret bulk` で設定)
 
 これらは `wrangler.toml` には記載しません — Cloudflare に暗号化されて保存されます:
 
+- `DATABASE_URL`
 - `BETTER_AUTH_SECRET`
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
@@ -243,7 +244,7 @@ wrangler hyperdrive create monorepo-db \
 | API ランタイム | Node.js (`tsx watch`) | Cloudflare Workers | Cloudflare Workers |
 | Web ホスティング | Vite 開発サーバー | Worker 静的アセット | Worker 静的アセット |
 | データベース | Docker PostgreSQL | マネージド Postgres + Hyperdrive | マネージド Postgres + Hyperdrive |
-| シークレット | `.mise.local.toml` | `wrangler secret --env staging` | `wrangler secret --env production` |
+| シークレット | `.mise.local.toml` | `wrangler secret bulk --env staging` | `wrangler secret bulk --env production` |
 | デプロイ | なし | `wrangler deploy --env staging` | `wrangler deploy --env production` |
 
 ## 移行の順序

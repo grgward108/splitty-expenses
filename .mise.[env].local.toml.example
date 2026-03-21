@@ -1,0 +1,8 @@
+# production環境のローカル秘匿値（コミットしない）
+# .mise.production.local.toml にコピーして使用してください。
+
+[env]
+BETTER_AUTH_URL="http://localhost:3000"
+CLOUDFLARE_API_TOKEN = ""
+# DATABASE_URL = "" # Cloudflare Workerのシークレットとして登録するため、ここには書かなくてもよいですが、ローカルから直接繋ぐ場合は記載します。
+# HYPERDRIVE_ID = "" # wrangler.toml の [[env.production.hyperdrive]] に直接記載するため、ここでの設定は必須ではありません。

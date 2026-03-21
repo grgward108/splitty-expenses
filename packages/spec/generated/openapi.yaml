@@ -6,7 +6,7 @@ tags:
   - name: tasks
   - name: health
 paths:
-  /health:
+  /api/health:
     get:
       operationId: Health_check
       parameters: []
@@ -31,7 +31,7 @@ paths:
                   - timestamp
       tags:
         - health
-  /tasks:
+  /api/tasks:
     get:
       operationId: Tasks_list
       parameters:
@@ -91,7 +91,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateTaskRequest'
-  /tasks/{id}:
+  /api/tasks/{id}:
     get:
       operationId: Tasks_get
       parameters:

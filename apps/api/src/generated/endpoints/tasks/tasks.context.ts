@@ -12,19 +12,19 @@ CreateTaskRequest,
   UpdateTaskRequest
 } from '../../schemas';
 
-export type TasksListContext<E extends Env = any> = Context<E, '/tasks', { in: { query: TasksListParams, }, out: { query: TasksListParams, } }>
-export type TasksCreateContext<E extends Env = any> = Context<E, '/tasks', { in: { json: CreateTaskRequest, }, out: { json: CreateTaskRequest, } }>
-export type TasksGetContext<E extends Env = any> = Context<E, '/tasks/:id', { in: { param: {
+export type TasksListContext<E extends Env = any> = Context<E, '/api/tasks', { in: { query: TasksListParams, }, out: { query: TasksListParams, } }>
+export type TasksCreateContext<E extends Env = any> = Context<E, '/api/tasks', { in: { json: CreateTaskRequest, }, out: { json: CreateTaskRequest, } }>
+export type TasksGetContext<E extends Env = any> = Context<E, '/api/tasks/:id', { in: { param: {
  id: string,
  }, }, out: { param: {
  id: string,
  }, } }>
-export type TasksUpdateContext<E extends Env = any> = Context<E, '/tasks/:id', { in: { param: {
+export type TasksUpdateContext<E extends Env = any> = Context<E, '/api/tasks/:id', { in: { param: {
  id: string,
  },json: UpdateTaskRequest, }, out: { param: {
  id: string,
  },json: UpdateTaskRequest, } }>
-export type TasksDeleteContext<E extends Env = any> = Context<E, '/tasks/:id', { in: { param: {
+export type TasksDeleteContext<E extends Env = any> = Context<E, '/api/tasks/:id', { in: { param: {
  id: string,
  }, }, out: { param: {
  id: string,

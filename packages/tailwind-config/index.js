@@ -52,6 +52,7 @@ export default {
         "fade-in": "fadeIn 0.2s ease-in-out",
         "slide-up": "slideUp 0.3s ease-out",
         "slide-down": "slideDown 0.3s ease-out",
+        morph: "morph 3s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
@@ -65,6 +66,24 @@ export default {
         slideDown: {
           "0%": { transform: "translateY(-10px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        morph: {
+          "0%, 100%": {
+            borderRadius: "20%",
+            transform: "rotate(0deg) scale(1)",
+          },
+          "25%": {
+            borderRadius: "50%",
+            transform: "rotate(90deg) scale(0.9)",
+          },
+          "50%": {
+            borderRadius: "5%",
+            transform: "rotate(180deg) scale(1.1)",
+          },
+          "75%": {
+            borderRadius: "50%",
+            transform: "rotate(270deg) scale(0.9)",
+          },
         },
       },
     },

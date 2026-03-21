@@ -14,11 +14,11 @@ import { tasksDeleteHandlers } from '../handlers/tasksDelete';
 
 const app = new Hono()
 
-app.get('/health',...healthCheckHandlers);
-app.get('/tasks',...tasksListHandlers);
-app.post('/tasks',...tasksCreateHandlers);
-app.get('/tasks/:id',...tasksGetHandlers);
-app.put('/tasks/:id',...tasksUpdateHandlers);
-app.delete('/tasks/:id',...tasksDeleteHandlers)
+app.get('/api/health',...healthCheckHandlers);
+app.get('/api/tasks',...tasksListHandlers);
+app.post('/api/tasks',...tasksCreateHandlers);
+app.get('/api/tasks/:id',...tasksGetHandlers);
+app.put('/api/tasks/:id',...tasksUpdateHandlers);
+app.delete('/api/tasks/:id',...tasksDeleteHandlers)
 
 export default app

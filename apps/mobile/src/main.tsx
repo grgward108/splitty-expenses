@@ -52,7 +52,7 @@ function renderApp() {
 
 async function init() {
   // API ベース URL を設定
-  setBaseUrl(import.meta.env.VITE_API_BASE_URL || "http://localhost:3000");
+  setBaseUrl(import.meta.env.BETTER_AUTH_URL || "http://localhost:3000");
 
   try {
     // Preferences から保存済みセッショントークンを復元し、

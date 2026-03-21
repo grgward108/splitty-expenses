@@ -3,11 +3,13 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
+  AvatarSkeleton,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Skeleton,
 } from "@repo/ui";
 import { Link, Outlet, createRootRoute, useRouterState } from "@tanstack/react-router";
 
@@ -16,7 +18,7 @@ export const Route = createRootRoute({
 });
 
 function RootLayout() {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const routerState = useRouterState();
   const isLoginPage = routerState.location.pathname === "/login";
 
@@ -45,7 +47,16 @@ function RootLayout() {
                 </Link>
               </div>
               <div className="flex items-center space-x-4">
-                {session?.user ? (
+                {isPending ? (
+                  <div
+                    className="flex items-center gap-3"
+                    aria-busy="true"
+                    aria-label="ユーザー情報を読み込み中"
+                  >
+                    <Skeleton className="h-4 max-w-[12rem] sm:max-w-[16rem] w-32 sm:w-40 rounded-md" />
+                    <AvatarSkeleton size="md" />
+                  </div>
+                ) : session?.user ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button

@@ -76,7 +76,27 @@ You should see: `Migrations completed`
 
 ## Step 6: Set Cloudflare Worker Secrets
 
-These are runtime secrets that the Worker reads from `c.env`. Set them from the `apps/api/` directory:
+These are runtime secrets that the Worker reads from `c.env`. Set them from the `apps/api/` directory using the provided script or manually:
+
+### Using the bulk script (Recommended)
+
+1. Set your secrets in `mise.staging.local.toml` (for staging) or `mise.production.local.toml` (for production). These filenames match [mise environment configs](https://mise.jdx.dev/configuration/environments.html) — no leading dot before `mise`.
+   ```toml
+   [env]
+   DATABASE_URL = "your-neon-connection-string"
+   BETTER_AUTH_SECRET = "your-random-secret"
+   # 本番・ステージングの Worker 公開 URL（mise.staging.toml にある場合は省略可）
+   BETTER_AUTH_URL = "https://monorepo-app-staging.<your-account>.workers.dev"
+   GOOGLE_CLIENT_ID = "your-google-client-id"
+   GOOGLE_CLIENT_SECRET = "your-google-client-secret"
+   ```
+2. Run the script (it will automatically read the environment variables and push them):
+   ```bash
+   mise run cf:secrets:staging
+   # or for production: mise run cf:secrets:production
+   ```
+
+### Manual setup
 
 ```bash
 cd apps/api
@@ -91,9 +111,23 @@ pnpm wrangler secret put BETTER_AUTH_SECRET --env staging
 # Google OAuth (if using Google sign-in)
 pnpm wrangler secret put GOOGLE_CLIENT_ID --env staging
 pnpm wrangler secret put GOOGLE_CLIENT_SECRET --env staging
+
+# 公開オリジン（モバイル OAuth のコールバック・CORS/Better Auth の trustedOrigins に必須）
+pnpm wrangler secret put BETTER_AUTH_URL --env staging
 ```
 
 Repeat with `--env production` for production secrets.
+
+### それだけで足りるか（チェックリスト）
+
+Worker のシークレットとして上記を入れても、次は **別作業** が必要です。
+
+| 項目 | 説明 |
+|------|------|
+| **ビルド時の `BETTER_AUTH_URL`** | SPA はデプロイ前の `pnpm build` で `BETTER_AUTH_URL` がバンドルに埋め込まれます。CI では `MISE_ENV` に合わせた mise か、GitHub Actions の `env` で必ず同じ URL を渡してください。 |
+| **Google Cloud Console** | OAuth クライアントに、`<Worker URL>/api/auth/callback/google` など許可リダイレクト URI を登録する必要があります。 |
+| **Hyperdrive（任意）** | 使う場合は `wrangler.toml` の `[[env.staging.hyperdrive]]` 等に ID を書き、接続は `HYPERDRIVE` バインディング経由になります（`DATABASE_URL` シークレットと併用方針は運用で決める）。 |
+| **DB マイグレーション** | Neon 等に対して `db:migrate` を実行済みか確認してください。 |
 
 ## Step 7: Build & Deploy
 
@@ -179,14 +213,24 @@ The middleware in `app.ts` checks for environment variables in this order:
 
 | Secret | Where to set | Purpose |
 |--------|-------------|---------|
-| `CLOUDFLARE_API_TOKEN` | `.mise.local.toml` + GitHub Secrets | Deploy authentication |
-| `CLOUDFLARE_ACCOUNT_ID` | `.mise.local.toml` + GitHub Secrets | Deploy target account |
-| `DATABASE_URL` | `wrangler secret put` | Neon connection string |
-| `BETTER_AUTH_SECRET` | `wrangler secret put` | Session encryption (32+ chars) |
-| `GOOGLE_CLIENT_ID` | `wrangler secret put` | Google OAuth |
-| `GOOGLE_CLIENT_SECRET` | `wrangler secret put` | Google OAuth |
+| `CLOUDFLARE_API_TOKEN` | `mise.{env}.local.toml` + GitHub Secrets | Deploy authentication |
+| `CLOUDFLARE_ACCOUNT_ID` | `mise.{env}.local.toml` + GitHub Secrets | Deploy target account |
+| `HYPERDRIVE_ID` | `apps/api/wrangler.toml` | Hyperdrive config ID (not a Worker secret) |
+| `DATABASE_URL` | `wrangler secret bulk` | Neon connection string |
+| `BETTER_AUTH_SECRET` | `wrangler secret bulk` | Session encryption (32+ chars) |
+| `BETTER_AUTH_URL` | `wrangler secret bulk` | Worker の公開 URL（モバイル OAuth・本番オリジン許可に使用） |
+| `GOOGLE_CLIENT_ID` | `wrangler secret bulk` | Google OAuth |
+| `GOOGLE_CLIENT_SECRET` | `wrangler secret bulk` | Google OAuth |
 
 ## Troubleshooting
+
+### Better Auth: `please_restart_the_process` / "Something went wrong" after Google login
+
+多くは **OAuth の state 検証失敗**（[better-auth の既知パターン](https://github.com/better-auth/better-auth/issues)）です。Workers では次が典型です。
+
+- **`BETTER_AUTH_SECRET` がランタイムで読めていない** — Wrangler のシークレットは `c.env` にあり、`process.env` には載らないことがあります。アプリは `getAuth({ secret: c.env.BETTER_AUTH_SECRET, baseURL: c.env.BETTER_AUTH_URL, ... })` で明示渡しする（本リポジトリで対応済み）。
+- **`BETTER_AUTH_URL` が Worker の公開 URL と一致していない** — シークレット・ビルド時の SPA 埋め込み・Google Cloud のリダイレクト URI をすべて同じオリジンに揃える。
+- **古い Cookie** — サイトデータを削除してからログインし直す。
 
 ### "Failed to fetch" in the browser
 The web app loaded but can't reach the API. Check:

@@ -74,36 +74,39 @@ model PaginationQuery {
 // Routes
 // =====================================
 
-@route("/tasks")
-@tag("tasks")
-namespace Tasks {
-  @get
-  op list(...PaginationQuery): PaginatedResponse<Task> | ErrorResponse;
+@route("/api")
+namespace Api {
+  @route("/tasks")
+  @tag("tasks")
+  namespace Tasks {
+    @get
+    op list(...PaginationQuery): PaginatedResponse<Task> | ErrorResponse;
 
-  @get
-  @route("/{id}")
-  op get(@path id: string): Task | ErrorResponse;
+    @get
+    @route("/{id}")
+    op get(@path id: string): Task | ErrorResponse;
 
-  @post
-  op create(@body body: CreateTaskRequest): Task | ErrorResponse;
+    @post
+    op create(@body body: CreateTaskRequest): Task | ErrorResponse;
 
-  @put
-  @route("/{id}")
-  op update(@path id: string, @body body: UpdateTaskRequest): Task | ErrorResponse;
+    @put
+    @route("/{id}")
+    op update(@path id: string, @body body: UpdateTaskRequest): Task | ErrorResponse;
 
-  @delete
-  @route("/{id}")
-  op delete(@path id: string): void | ErrorResponse;
-}
+    @delete
+    @route("/{id}")
+    op delete(@path id: string): void | ErrorResponse;
+  }
 
-@route("/health")
-@tag("health")
-namespace Health {
-  @get
-  op check(): {
-    status: "ok" | "error";
-    timestamp: utcDateTime;
-  };
+  @route("/health")
+  @tag("health")
+  namespace Health {
+    @get
+    op check(): {
+      status: "ok" | "error";
+      timestamp: utcDateTime;
+    };
+  }
 }
 
 
