@@ -29,6 +29,10 @@ run = "pnpm --filter @repo/web dev"
 description = "モバイルアプリのみ起動"
 run = "pnpm --filter @repo/mobile dev"
 
+[tasks."dev:api-docs"]
+description = "APIドキュメント（Scalar）を起動"
+run = "pnpm --filter @repo/api-docs dev"
+
 # ============================================
 # ビルドタスク
 # ============================================

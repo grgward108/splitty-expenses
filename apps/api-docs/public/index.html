@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Monorepo API — Scalar</title>
+    <style>
+      body {
+        margin: 0;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <script
+      id="api-reference"
+      data-url="./openapi.yaml"
+      data-configuration='{"theme":"default"}'
+    ></script>
+    <!-- exports の短縮パスは jsDelivr で 404 になるため dist を含める -->
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference/dist/browser/standalone.js"></script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "@repo/api-docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/copy-openapi.mjs",
+    "dev": "pnpm build && serve -l 8788 public",
+    "clean": "rm -f public/openapi.yaml"
+  },
+  "devDependencies": {
+    "serve": "^14.2.4"
+  }
+}
