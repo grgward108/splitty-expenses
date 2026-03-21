@@ -13,6 +13,10 @@ export type AppBindings = {
   GOOGLE_CLIENT_SECRET?: string;
   BETTER_AUTH_SECRET?: string;
   BETTER_AUTH_URL?: string;
+  /** Resend API キー（Workers では `wrangler secret put RESEND_API_KEY`） */
+  RESEND_API_KEY?: string;
+  /** Resend の From（例: `Monorepo <noreply@example.com>`）。検証済みドメインまたは Resend のテスト用アドレス */
+  RESEND_FROM_EMAIL?: string;
 };
 
 export type AppEnv = {

@@ -20,6 +20,11 @@ run_worker_first = ["/api/*"]
 # binding = "HYPERDRIVE"
 # id = "<hyperdrive-config-id>"
 
+# Resend（@repo/email）: Workers ではシークレットとして注入する（wrangler.toml には書かない）
+#   wrangler secret put RESEND_API_KEY
+#   wrangler secret put RESEND_FROM_EMAIL   # 例: Monorepo <noreply@yourdomain.com>
+#   または scripts/push-cloudflare-secrets.sh で一括（環境変数をセットしてから実行）
+
 # --- Staging ---
 [env.staging]
 name = "monorepo-app-staging"

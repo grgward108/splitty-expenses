@@ -65,6 +65,16 @@ model MobileOAuthInitError {
   error: string;
 }
 
+model SendTestEmailRequest {
+  /** 省略時はログイン中ユーザーのメールアドレスへ送信します。 */
+  to?: string;
+}
+
+model SendTestEmailResponse {
+  message: string;
+  id?: string;
+}
+
 // =====================================
 // Query Parameters
 // =====================================
@@ -131,6 +141,14 @@ namespace Api {
       @statusCode statusCode: 302;
       @header location: string;
     };
+  }
+
+  @route("/email")
+  @tag("email")
+  namespace Email {
+    @post
+    @route("/test")
+    op sendTest(@body body: SendTestEmailRequest): SendTestEmailResponse | ErrorResponse;
   }
 }
 

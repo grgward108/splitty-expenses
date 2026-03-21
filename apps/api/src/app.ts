@@ -46,6 +46,7 @@ const dbAuthMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
 
 app.use("/api/auth/*", dbAuthMiddleware);
 app.use("/api/tasks/*", dbAuthMiddleware);
+app.use("/api/email/*", dbAuthMiddleware);
 
 // セッションミドルウェア（タスク API のみ c.get("user") / c.get("session") をセット）
 const sessionMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
@@ -57,6 +58,7 @@ const sessionMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
 };
 
 app.use("/api/tasks/*", sessionMiddleware);
+app.use("/api/email/*", sessionMiddleware);
 
 // 生成ルートを Better Auth の /api/auth/* より先にマウント（/api/auth/mobile/* を確実に一致させる）
 app.route("/", generatedRoutes);

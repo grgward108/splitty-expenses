@@ -14,6 +14,7 @@
 | API 契約（TypeSpec / OpenAPI / 生成クライアント） | `packages/spec/AGENTS.md` |
 | ドメイン | `packages/core/AGENTS.md` |
 | インフラ・DB・認証の具体実装 | `packages/infrastructure/AGENTS.md` |
+| メール（Resend / React Email） | `packages/email/AGENTS.md` |
 | UI ライブラリ | `packages/ui/AGENTS.md` |
 | Tailwind 共有設定 | `packages/tailwind-config/AGENTS.md` |
 

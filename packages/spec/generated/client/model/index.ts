@@ -6,12 +6,15 @@
  */
 
 export * from './createTaskRequest';
+export * from './emailSendTest200';
 export * from './errorResponse';
 export * from './healthCheck200';
 export * from './healthCheck200Status';
 export * from './mobileOAuthInitError';
 export * from './paginationQueryLimitParameter';
 export * from './paginationQueryPageParameter';
+export * from './sendTestEmailRequest';
+export * from './sendTestEmailResponse';
 export * from './task';
 export * from './taskStatus';
 export * from './tasksCreate200';
