@@ -1,0 +1,47 @@
+---
+description: ブランドカラーの利用ガイドライン。フロントエンド（web / hp / mobile / ui）のスタイルを書くときに従う。
+globs: "{apps/web,apps/hp,apps/mobile,packages/ui}/**/*.{tsx,jsx,ts,js,css}"
+alwaysApply: false
+---
+
+# ブランドカラー利用ガイドライン
+
+## カラーパレット
+
+| 用途 | Tailwind トークン | Hex |
+|------|-------------------|-----|
+| 背景 | `brand-background` | #F7FAFF |
+| メイン（オレンジ） | `primary-500` | #F7AB00 |
+| アクセント（シアン） | `accent-500` | #00E5FF |
+| テキスト | `brand-foreground` / `secondary-900` | #0B1026 |
+| グラデーション | `bg-gradient-brand` (→) / `bg-gradient-brand-br` (↘) | #F7AB00 → #00E5FF |
+
+定義の正は `packages/tailwind-config/tokens.js`。色を追加・変更するときはここだけ編集する。
+
+## 使い分けルール
+
+### primary（オレンジ系 50–950）
+- ボタン、リンク、フォーカスリングなど **主要なインタラクティブ要素** に使う。
+- 例: `bg-primary-500`, `text-primary-600`, `ring-primary-500`, `shadow-primary-500/20`
+
+### accent（シアン系 50–950）
+- バッジ、ハイライト、ホバー演出など **視線を引く補助要素** に使う。
+- 例: `bg-accent-500`, `text-accent-600`, `border-accent-400`
+
+### グラデーション（orange → cyan）
+- ヒーローセクション、CTA ボタン、装飾的な背景、ローディングアニメーションに使う。
+- 水平: `bg-gradient-brand`、斜め: `bg-gradient-brand-br`
+- テキストグラデ: `bg-gradient-brand bg-clip-text text-transparent`
+
+### secondary（ニュートラル 50–950）
+- 本文テキスト、ボーダー、ミュート背景など **情報の土台** に使う。
+
+### brand ショートカット
+- `brand-background`: ページ全体の背景。
+- `brand-foreground`: 本文テキスト。
+
+## 禁止事項
+
+- **hex の直書き禁止**: `style={{ color: "#F7AB00" }}` のようなインライン指定は使わない。必ず Tailwind クラスまたは CSS 変数を使う。
+- **旧カラーの残存禁止**: 以前のブルー系（`#3EA8FF`, `#2563EB`, `#60A5FA` 等）を新規コードで使わない。
+- `@repo/tailwind-config` に定義されていない色を新しく作らない。必要なら `tokens.js` にトークンを追加する。

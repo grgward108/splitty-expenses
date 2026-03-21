@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-import { colors } from "./tokens.js";
+import { brand, colors } from "./tokens.js";
 
 const toHexPalette = (palette) =>
   Object.fromEntries(
@@ -16,10 +16,21 @@ export default {
     extend: {
       colors: {
         primary: toHexPalette(colors.primary),
+        accent: toHexPalette(colors.accent),
         secondary: toHexPalette(colors.secondary),
         success: toHexPalette(colors.success),
         warning: toHexPalette(colors.warning),
         danger: toHexPalette(colors.danger),
+        brand: {
+          background: brand.background.hex,
+          foreground: brand.text.hex,
+          orange: brand.orange.hex,
+          cyan: brand.cyan.hex,
+        },
+      },
+      backgroundImage: {
+        "gradient-brand": `linear-gradient(90deg, ${brand.orange.hex} 0%, ${brand.cyan.hex} 100%)`,
+        "gradient-brand-br": `linear-gradient(135deg, ${brand.orange.hex} 0%, ${brand.cyan.hex} 100%)`,
       },
       fontFamily: {
         sans: [

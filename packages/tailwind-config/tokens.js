@@ -2,35 +2,59 @@
  * デザイントークン（配色）のマスター定義。
  * 配色を変更するときはこのファイルのみ編集する。
  * Tailwind設定・base.css・Ionic変数はここから派生する。
- * Zenn / Nani 風のブルー・Slate 系カラースキーム。
+ *
+ * ブランド: 背景 #F7FAFF、メインオレンジ #F7AB00、アクセントシアン #00E5FF、テキスト #0B1026。
  */
 
+/** コアブランド（単色） */
+export const brand = {
+  background: { hex: "#F7FAFF", rgb: "247 250 255" },
+  orange: { hex: "#F7AB00", rgb: "247 171 0" },
+  cyan: { hex: "#00E5FF", rgb: "0 229 255" },
+  text: { hex: "#0B1026", rgb: "11 16 38" },
+};
+
 export const colors = {
+  /** メイン（オレンジ）— 500 がブランドオレンジ */
   primary: {
-    50: { hex: "#EFF6FF", rgb: "239 246 255" },
-    100: { hex: "#DBEAFE", rgb: "219 234 254" },
-    200: { hex: "#BFDBFE", rgb: "191 219 254" },
-    300: { hex: "#93C5FD", rgb: "147 197 253" },
-    400: { hex: "#60A5FA", rgb: "96 165 250" },
-    500: { hex: "#3EA8FF", rgb: "62 168 255" },
-    600: { hex: "#2563EB", rgb: "37 99 235" },
-    700: { hex: "#1D4ED8", rgb: "29 78 216" },
-    800: { hex: "#1E40AF", rgb: "30 64 175" },
-    900: { hex: "#1E3A8A", rgb: "30 58 138" },
-    950: { hex: "#172554", rgb: "23 37 84" },
+    50: { hex: "#FFFBF0", rgb: "255 251 240" },
+    100: { hex: "#FEF3D6", rgb: "254 243 214" },
+    200: { hex: "#FDE4A8", rgb: "253 228 168" },
+    300: { hex: "#FCD06A", rgb: "252 208 106" },
+    400: { hex: "#F9BC2E", rgb: "249 188 46" },
+    500: { hex: brand.orange.hex, rgb: brand.orange.rgb },
+    600: { hex: "#CC9000", rgb: "204 144 0" },
+    700: { hex: "#A37300", rgb: "163 115 0" },
+    800: { hex: "#7A5700", rgb: "122 87 0" },
+    900: { hex: "#4D3600", rgb: "77 54 0" },
+    950: { hex: "#291D00", rgb: "41 29 0" },
+  },
+  /** アクセント（シアン）— 500 がブランドシアン */
+  accent: {
+    50: { hex: "#E6FDFF", rgb: "230 253 255" },
+    100: { hex: "#B3F7FF", rgb: "179 247 255" },
+    200: { hex: "#80F0FF", rgb: "128 240 255" },
+    300: { hex: "#4DE9FF", rgb: "77 233 255" },
+    400: { hex: "#1AE3FF", rgb: "26 227 255" },
+    500: { hex: brand.cyan.hex, rgb: brand.cyan.rgb },
+    600: { hex: "#00B8CC", rgb: "0 184 204" },
+    700: { hex: "#008A99", rgb: "0 138 153" },
+    800: { hex: "#005C66", rgb: "0 92 102" },
+    900: { hex: "#002E33", rgb: "0 46 51" },
+    950: { hex: "#001719", rgb: "0 23 25" },
   },
   secondary: {
-    50: { hex: "#F8FAFC", rgb: "248 250 252" },
-    100: { hex: "#F1F5F9", rgb: "241 245 249" },
-    200: { hex: "#E2E8F0", rgb: "226 232 240" },
-    300: { hex: "#CBD5E1", rgb: "203 213 225" },
-    400: { hex: "#94A3B8", rgb: "148 163 184" },
-    500: { hex: "#64748B", rgb: "100 116 139" },
-    600: { hex: "#475569", rgb: "71 85 105" },
-    700: { hex: "#334155", rgb: "51 65 85" },
-    800: { hex: "#1E293B", rgb: "30 41 59" },
-    900: { hex: "#0F172A", rgb: "15 23 42" },
-    950: { hex: "#020617", rgb: "2 6 23" },
+    50: { hex: "#F4F6FA", rgb: "244 246 250" },
+    100: { hex: "#E8ECF4", rgb: "232 236 244" },
+    200: { hex: "#D1D8E8", rgb: "209 216 232" },
+    300: { hex: "#A8B4CC", rgb: "168 180 204" },
+    400: { hex: "#7886A8", rgb: "120 134 168" },
+    500: { hex: "#556189", rgb: "85 97 137" },
+    600: { hex: "#3D4665", rgb: "61 70 101" },
+    700: { hex: "#2B3248", rgb: "43 50 72" },
+    800: { hex: "#1A1F30", rgb: "26 31 48" },
+    900: { hex: brand.text.hex, rgb: brand.text.rgb },
+    950: { hex: "#05070F", rgb: "5 7 15" },
   },
   success: {
     50: { hex: "#f0fdf4", rgb: "240 253 244" },
@@ -52,21 +76,21 @@ export const colors = {
 /** セマンティックトークン（背景・前景・カード等）。base.css の CSS 変数と一致させる。 */
 export const semanticTokens = {
   light: {
-    background: "255 255 255",
-    foreground: colors.secondary[900].rgb,
+    background: brand.background.rgb,
+    foreground: brand.text.rgb,
     card: "255 255 255",
-    cardForeground: colors.secondary[900].rgb,
+    cardForeground: brand.text.rgb,
     border: colors.secondary[200].rgb,
     muted: colors.secondary[100].rgb,
     mutedForeground: colors.secondary[500].rgb,
   },
   dark: {
-    background: colors.secondary[950].rgb,
-    foreground: colors.secondary[50].rgb,
-    card: colors.secondary[900].rgb,
-    cardForeground: colors.secondary[50].rgb,
-    border: colors.secondary[700].rgb,
-    muted: colors.secondary[900].rgb,
-    mutedForeground: colors.secondary[400].rgb,
+    background: brand.text.rgb,
+    foreground: brand.background.rgb,
+    card: colors.secondary[800].rgb,
+    cardForeground: brand.background.rgb,
+    border: colors.secondary[600].rgb,
+    muted: colors.secondary[800].rgb,
+    mutedForeground: colors.secondary[300].rgb,
   },
 };

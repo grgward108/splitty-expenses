@@ -23,6 +23,7 @@ src/
 ## ルール・慣習
 
 - **スタイル**: TailwindCSS を使用。`@repo/tailwind-config` を参照する。クラスは `cn()` で結合する。
+- **カラー**: hex の直書き（`style={{ color: "#..." }}`）は禁止。必ず Tailwind トークンを使う。主要色は `primary-*`（オレンジ）、アクセントは `accent-*`（シアン）、装飾グラデーションは `bg-gradient-brand` / `bg-gradient-brand-br`。詳細は `.cursor/rules/brand-colors.mdc` を参照。
 - **コンポーネント**: `forwardRef` を使い、`displayName` を設定する。Props は `HTMLAttributes` を拡張し、`className` を継承する。
 - **バリアント**: 見た目のバリエーションは `variant` プロップで渡し、オブジェクトでスタイルを切り替える（例: Alert の `info` / `success` / `warning` / `error`）。
 - **ダークモード**: `dark:` プレフィックスで対応する。

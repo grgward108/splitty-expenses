@@ -27,6 +27,7 @@ src/
 
 - **UI**: `@repo/ui` のコンポーネントを使う
 - **スタイル**: `globals.css` で `@repo/tailwind-config/base.css` を読み込み、`tailwind.config.js` でプリセットを参照する
+- **カラー**: `@repo/tailwind-config` のブランドトークンを使う。メイン `primary-*`（オレンジ）、アクセント `accent-*`（シアン）、グラデーション `bg-gradient-brand` / `bg-gradient-brand-br`。hex 直書きは禁止。詳細は `.cursor/rules/brand-colors.mdc`。
 - **ルート追加**: `src/routes/` 配下に `<path>/route.tsx` を追加する（トップ `/` のみ `index.tsx` を使用。`index/route.tsx` はルートジェネレータの不具合を避けるため使わない）。ロジック分離が必要なら `route.model.ts` を同階層に置く（`routeFileIgnorePattern` で `.model.` はルート生成から除外）
 - **ルートツリー**: `routeTree.gen.ts` は Vite ビルド時に自動生成される。手で編集しない
 
