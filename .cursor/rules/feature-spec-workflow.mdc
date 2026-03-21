@@ -1,0 +1,6 @@
+---
+description: 新規機能・フルスタック実装（API と Web とモバイル）では feature-spec-fullstack スキルに従う。機能仕様を docs/specs に書き、ユーザー承認後にのみ TypeSpec とコードを変更する。
+alwaysApply: true
+---
+
+新規機能やエンドポイント追加で複数アプリにまたがる場合は、`.cursor/skills/feature-spec-fullstack/SKILL.md` を読み、そこで定義された承認ゲートと実装順序に従うこと。単一箇所のバグ修正では不要。
