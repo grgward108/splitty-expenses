@@ -16,6 +16,13 @@ BETTER_AUTH_URL = "http://localhost:3000"
 GOOGLE_CLIENT_ID = ""
 GOOGLE_CLIENT_SECRET = ""
 
+# Resend（トランザクションメール。`packages/email` / `@repo/email`）
+# https://resend.com/api-keys
+RESEND_API_KEY = ""
+# From ヘッダー（検証済みドメイン、または Resend のテスト: onboarding@resend.dev）
+# 例: RESEND_FROM_EMAIL = "Monorepo <onboarding@resend.dev>"
+RESEND_FROM_EMAIL = ""
+
 # --- Cloudflare デプロイ用 ---
 # wrangler deploy に必要な認証情報
 CLOUDFLARE_API_TOKEN = ""

@@ -1,5 +1,6 @@
 import { useTheme } from "@/contexts/theme";
 import { authClient } from "@/lib/auth-client";
+import { useEmailSendTest } from "@repo/spec/client/email/email";
 import {
   Avatar,
   AvatarFallback,
@@ -30,6 +31,12 @@ function SettingsPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [testEmailTo, setTestEmailTo] = useState("");
+  const [testEmailMessage, setTestEmailMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const sendTestEmailMutation = useEmailSendTest();
 
   useEffect(() => {
     if (session?.user?.name !== undefined) {
@@ -39,6 +46,28 @@ function SettingsPage() {
 
   const user = session?.user;
   if (!user) return null;
+
+  const handleSendTestEmail = async () => {
+    setTestEmailMessage(null);
+    try {
+      const res = await sendTestEmailMutation.mutateAsync({
+        data: testEmailTo.trim() ? { to: testEmailTo.trim() } : {},
+      });
+      const body = res.data as { message?: string; id?: string };
+      setTestEmailMessage({
+        type: "success",
+        text: body.id
+          ? `${body.message ?? "送信しました"}（ID: ${body.id}）`
+          : (body.message ?? "送信しました"),
+      });
+    } catch (err: unknown) {
+      const e = err as { message?: string; code?: string };
+      setTestEmailMessage({
+        type: "error",
+        text: e.message ?? "テストメールの送信に失敗しました",
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,6 +157,59 @@ function SettingsPage() {
               </Button>
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <Heading level={3}>メール（テスト）</Heading>
+          <Text color="muted" size="sm">
+            Resend 経由でテストメールを送信します。API に{" "}
+            <code className="rounded bg-secondary-100 px-1 py-0.5 text-xs dark:bg-secondary-800">
+              RESEND_API_KEY
+            </code>{" "}
+            と{" "}
+            <code className="rounded bg-secondary-100 px-1 py-0.5 text-xs dark:bg-secondary-800">
+              RESEND_FROM_EMAIL
+            </code>{" "}
+            が必要です。
+          </Text>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="test-email-to">送信先（任意）</Label>
+            <Input
+              id="test-email-to"
+              type="email"
+              placeholder={user.email ?? "空欄ならアカウントのメールへ送信"}
+              value={testEmailTo}
+              onChange={(e) => setTestEmailTo(e.target.value)}
+            />
+            <p className="text-xs text-secondary-500 dark:text-secondary-400">
+              空欄のときはログイン中のメールアドレス（{user.email ?? "未設定"}）に送ります。
+            </p>
+          </div>
+          {testEmailMessage && (
+            <p
+              className={
+                testEmailMessage.type === "success"
+                  ? "text-sm text-green-600 dark:text-green-400"
+                  : "text-sm text-red-600 dark:text-red-400"
+              }
+            >
+              {testEmailMessage.text}
+            </p>
+          )}
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={sendTestEmailMutation.isPending}
+              onClick={() => void handleSendTestEmail()}
+            >
+              {sendTestEmailMutation.isPending ? "送信中..." : "テストメールを送る"}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

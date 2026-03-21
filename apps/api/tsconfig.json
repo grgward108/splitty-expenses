@@ -11,5 +11,9 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/generated/endpoints/filename.validator.ts"],
-  "references": [{ "path": "../../packages/core" }, { "path": "../../packages/infrastructure" }]
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/email" },
+    { "path": "../../packages/infrastructure" }
+  ]
 }

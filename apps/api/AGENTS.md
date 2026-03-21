@@ -35,9 +35,9 @@ wrangler.toml           # Workers・アセット（web dist）・Hyperdrive 等
 
 - **生成コード**: `src/generated/` は手編集しない。OpenAPI を変えたあと Orval で再生成する。
 - **仕様の源泉**: API の契約は `@repo/spec`（TypeSpec）→ OpenAPI。変更は必ず spec 側から行い、ルート全体は `mise run generate`（`pnpm turbo run generate`）で spec クライアント等と揃える。API 専用の Orval は `pnpm --filter @repo/api generate`。
-- **ミドルウェア**: `/api/auth/*` と `/api/tasks/*` に DB・auth 初期化（`dbAuthMiddleware`）。`/api/tasks/*` には続けてセッション（`sessionMiddleware`）で `user` / `session` をセット。新しい認証必須プレフィックスを足す場合は `app.ts` で同様にマウントする。
+- **ミドルウェア**: `/api/auth/*`・`/api/tasks/*`・`/api/email/*` に DB・auth 初期化（`dbAuthMiddleware`）。`/api/tasks/*` と `/api/email/*` には続けてセッション（`sessionMiddleware`）で `user` / `session` をセット。新しい認証必須プレフィックスを足す場合は `app.ts` で同様にマウントする。
 - **ルート順**: 生成ルートを先にマウントし、続けて Better Auth の `/api/auth/*` フォールバックを登録する（`app.ts` のコメント参照）。
-- **環境変数**: Node では `process.env`、Workers では `c.env`。DB は `HYPERDRIVE.connectionString` または `DATABASE_URL`。OAuth・セッションは `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` など（未設定時の挙動は `app.ts` を参照）。
+- **環境変数**: Node では `process.env`、Workers では `c.env`。DB は `HYPERDRIVE.connectionString` または `DATABASE_URL`。OAuth・セッションは `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` / `BETTER_AUTH_SECRET` / `BETTER_AUTH_URL` など（未設定時の挙動は `app.ts` を参照）。メール送信（`@repo/email`）は `RESEND_API_KEY`（Workers では `wrangler secret put`、ローカルは `.mise.local.toml`）。
 - **Workers**: [`wrangler.toml`](wrangler.toml) で `main = src/worker.ts`、必要に応じて Hyperdrive バインディングを設定する。
 
 ## このパッケージを編集するとき
