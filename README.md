@@ -62,6 +62,22 @@ mise run dev:mobile
 mise run dev:api
 ```
 
+#### `mise run dev` で開く localhost 一覧
+
+`mise run dev` は `pnpm turbo run dev storybook` を実行し、各パッケージの開発サーバーが並列で起動します。デフォルトのポートは次のとおりです（環境変数で変えている場合はその値に従います）。
+
+| サービス | URL | 備考 |
+|----------|-----|------|
+| Web アプリ | http://localhost:5173 | `apps/web`（Vite） |
+| API | http://localhost:3000 | `apps/api`（`PORT` で変更可） |
+| Mobile（Vite） | http://localhost:8100 | `apps/mobile` |
+| Swagger UI（OpenAPI） | http://localhost:4000/api-docs | `packages/spec`（`SWAGGER_PORT` でポート変更可。`/` は `/api-docs` にリダイレクト） |
+| Storybook | http://localhost:6006 | `packages/ui` |
+| Scalar API ドキュメント | http://localhost:8788 | `apps/api-docs`（`serve` で `public/` を配信） |
+| PostgreSQL | `localhost:5432` | DB 接続用（ブラウザ用 URL ではない） |
+
+`packages/ui` の `dev`（tsup の watch）はビルドウォッチのみで、ブラウザで開く URL はありません。コンポーネント確認は上記 Storybook を利用してください。
+
 ### Local Database (PostgreSQL)
 
 ローカル開発では Docker Compose で PostgreSQL を使用します。**初回のみ** mise のローカル設定を用意してください。
@@ -131,7 +147,8 @@ monorepo/
 ├── apps/
 │   ├── web/              # React web app
 │   ├── mobile/           # Ionic mobile app
-│   └── api/              # Hono API server
+│   ├── api/              # Hono API server
+│   └── api-docs/         # Scalar API docs (static)
 ├── packages/
 │   ├── core/             # Domain logic
 │   ├── infrastructure/   # External integrations (PostgreSQL, Drizzle ORM)

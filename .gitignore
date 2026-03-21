@@ -41,3 +41,9 @@ apps/mobile/ios/
 apps/mobile/android/
 
 *.tsbuildinfo
+
+# API docs (Scalar) — generated OpenAPI copy
+apps/api-docs/public/openapi.yaml
+apps/api-docs/.dev.vars
+
+.wrangler/

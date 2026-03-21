@@ -19,6 +19,10 @@
       "dependsOn": ["^build"],
       "outputs": []
     },
+    "@repo/api-docs#build": {
+      "dependsOn": ["@repo/spec#generate"],
+      "outputs": ["public/openapi.yaml"]
+    },
     "dev": {
       "cache": false,
       "persistent": true
