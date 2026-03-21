@@ -61,6 +61,10 @@ model ErrorResponse {
   code: string;
 }
 
+model MobileOAuthInitError {
+  error: string;
+}
+
 // =====================================
 // Query Parameters
 // =====================================
@@ -105,6 +109,27 @@ namespace Api {
     op check(): {
       status: "ok" | "error";
       timestamp: utcDateTime;
+    };
+  }
+
+  @route("/auth/mobile")
+  @tag("mobile-auth")
+  namespace MobileAuth {
+    @get
+    @route("/google")
+    op google(): {
+      @statusCode statusCode: 302;
+      @header location: string;
+    } | {
+      @statusCode statusCode: 500;
+      @body body: MobileOAuthInitError;
+    };
+
+    @get
+    @route("/callback")
+    op callback(): {
+      @statusCode statusCode: 302;
+      @header location: string;
     };
   }
 }

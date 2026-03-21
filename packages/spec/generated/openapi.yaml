@@ -5,7 +5,42 @@ info:
 tags:
   - name: tasks
   - name: health
+  - name: mobile-auth
 paths:
+  /api/auth/mobile/callback:
+    get:
+      operationId: MobileAuth_callback
+      parameters: []
+      responses:
+        '302':
+          description: Redirection
+          headers:
+            location:
+              required: true
+              schema:
+                type: string
+      tags:
+        - mobile-auth
+  /api/auth/mobile/google:
+    get:
+      operationId: MobileAuth_google
+      parameters: []
+      responses:
+        '302':
+          description: Redirection
+          headers:
+            location:
+              required: true
+              schema:
+                type: string
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileOAuthInitError'
+      tags:
+        - mobile-auth
   /api/health:
     get:
       operationId: Health_check
@@ -201,6 +236,13 @@ components:
         message:
           type: string
         code:
+          type: string
+    MobileOAuthInitError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
           type: string
     Task:
       type: object
