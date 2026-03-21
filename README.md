@@ -14,6 +14,7 @@ A full-stack TypeScript monorepo built with Turborepo.
 | App | Description | Tech |
 |-----|-------------|------|
 | `apps/web` | Web application | React, Tanstack Router, Tanstack Query, Vite |
+| `apps/hp` | Landing / marketing site (public HP) | React, Tanstack Router, Tanstack Query, Vite |
 | `apps/mobile` | Mobile application | Ionic, Capacitor, React |
 | `apps/api` | Backend API | Hono, Node.js |
 
@@ -58,6 +59,7 @@ mise run dev
 
 # Run specific app
 mise run dev:web
+mise run dev:hp
 mise run dev:mobile
 mise run dev:api
 ```
@@ -69,6 +71,7 @@ mise run dev:api
 | サービス | URL | 備考 |
 |----------|-----|------|
 | Web アプリ | http://localhost:5173 | `apps/web`（Vite） |
+| HP（ランディング） | http://localhost:5174 | `apps/hp`（Vite） |
 | API | http://localhost:3000 | `apps/api`（`PORT` で変更可） |
 | Mobile（Vite） | http://localhost:8100 | `apps/mobile` |
 | Swagger UI（OpenAPI） | http://localhost:4000/api-docs | `packages/spec`（`SWAGGER_PORT` でポート変更可。`/` は `/api-docs` にリダイレクト） |
@@ -126,6 +129,8 @@ function TasksPage() {
 }
 ```
 
+`apps/hp`（公開 HP）は `@repo/ui` / `@repo/tailwind-config` を使う静的寄りの SPA で、API 生成クライアントは通常使いません。デプロイは [apps/hp/AGENTS.md](apps/hp/AGENTS.md)（Cloudflare Pages / Wrangler）を参照してください。
+
 ```typescript
 // Backend: apps/api - using generated Zod schemas for validation
 import { zValidator } from "@hono/zod-validator";
@@ -146,6 +151,7 @@ app.post("/api/tasks", zValidator("json", tasksCreateBody), async (c) => {
 monorepo/
 ├── apps/
 │   ├── web/              # React web app
+│   ├── hp/               # Landing / marketing (Vite SPA, Pages 用 wrangler.toml)
 │   ├── mobile/           # Ionic mobile app
 │   ├── api/              # Hono API server
 │   └── api-docs/         # Scalar API docs (static)
@@ -169,7 +175,10 @@ monorepo/
 | Task | Description |
 |------|-------------|
 | `mise run build` | Build all packages and apps |
+| `mise run build:hp` | Build HP app only (`apps/hp`) |
 | `mise run dev` | Start development servers |
+| `mise run dev:hp` | Start HP app only (`apps/hp`, Vite on :5174) |
+| `mise run deploy-hp` | Build `apps/hp` and deploy to Cloudflare Pages (`wrangler pages deploy`) |
 | `mise run generate` | Generate API client & server code from TypeSpec |
 | `mise run typecheck` | Run TypeScript type checking |
 | `mise run lint` | Run linting (Biome) |

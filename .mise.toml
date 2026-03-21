@@ -25,6 +25,10 @@ run = "pnpm --filter @repo/api dev"
 description = "Webアプリのみ起動"
 run = "pnpm --filter @repo/web dev"
 
+[tasks."dev:hp"]
+description = "HP（ランディング）のみ起動"
+run = "pnpm --filter @repo/hp dev"
+
 [tasks."dev:mobile"]
 description = "モバイルアプリのみ起動"
 run = "pnpm --filter @repo/mobile dev"
@@ -48,6 +52,10 @@ run = "pnpm --filter @repo/api build"
 [tasks."build:web"]
 description = "Webアプリのみビルド"
 run = "pnpm --filter @repo/web build"
+
+[tasks."build:hp"]
+description = "HPアプリのみビルド"
+run = "pnpm --filter @repo/hp build"
 
 [tasks."build:mobile"]
 description = "モバイルアプリのみビルド"
@@ -188,6 +196,11 @@ run = "docker-compose restart"
 # ============================================
 # Cloudflare デプロイ
 # ============================================
+
+[tasks."deploy-hp"]
+description = "HP（apps/hp）をビルドして Cloudflare Pages にデプロイ（初回は wrangler login）"
+depends = ["build:hp"]
+run = "pnpm --filter @repo/hp deploy"
 
 # タスクの env = { MISE_ENV = ... } では mise.*.local.toml は読まれない。
 # 代わりに mise exec -E <env> で子プロセス側から環境別設定をマージする（手元で MISE_ENV= は不要）。

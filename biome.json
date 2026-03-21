@@ -53,6 +53,7 @@
       "packages/spec/generated",
       "apps/api/src/generated",
       "apps/web/src/routeTree.gen.ts",
+      "apps/hp/src/routeTree.gen.ts",
       "apps/mobile/ios",
       "apps/mobile/android",
       "*.d.ts"
