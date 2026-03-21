@@ -20,20 +20,10 @@ export function PageLoader({
     >
       <div className="relative flex items-center justify-center h-24 w-24">
         {/* Geometric morphing shape */}
-        <div
-          className="w-[80px] h-[80px] relative animate-morph shadow-lg shadow-primary-500/30"
-          style={{
-            background: "linear-gradient(135deg, #93C5FD, #2563EB)",
-          }}
-        />
+        <div className="h-[80px] w-[80px] relative animate-morph bg-gradient-brand-br shadow-lg shadow-primary-500/30" />
       </div>
       <div className="flex flex-col items-center space-y-2">
-        <h3
-          className="text-xl font-bold bg-clip-text text-transparent animate-pulse"
-          style={{
-            backgroundImage: "linear-gradient(to bottom right, #60A5FA, #3EA8FF)",
-          }}
-        >
+        <h3 className="animate-pulse bg-gradient-brand-br bg-clip-text text-xl font-bold text-transparent">
           {message}
         </h3>
         {subMessage && (

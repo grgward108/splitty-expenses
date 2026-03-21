@@ -43,6 +43,7 @@ src/
 - **セッション・ユーザー**: `authClient.useSession()` で取得。`session.user.image` に Google のプロフィール画像 URL が入る。
 - **ナイトモード**: `contexts/theme.tsx` の `ThemeProvider` で状態を保持し、`localStorage` に保存。設定画面で `useTheme()` から切り替え。
 - **UI**: `@repo/ui` のコンポーネントを使用。API は `@repo/spec` の生成クライアントを使用する。
+- **カラー**: `@repo/tailwind-config` のブランドトークンを使う。メイン `primary-*`（オレンジ）、アクセント `accent-*`（シアン）、グラデーション `bg-gradient-brand` / `bg-gradient-brand-br`。hex 直書きは禁止。詳細は `.cursor/rules/brand-colors.mdc`。
 
 ## このパッケージを編集するとき
 

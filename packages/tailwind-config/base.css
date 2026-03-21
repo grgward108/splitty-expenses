@@ -5,25 +5,27 @@
 
 @layer base {
   :root {
-    --background: 255 255 255;
-    --foreground: 15 23 42;
+    --background: 247 250 255;
+    --foreground: 11 16 38;
     --card: 255 255 255;
-    --card-foreground: 15 23 42;
-    --border: 226 232 240;
-    --muted: 241 245 249;
-    --muted-foreground: 100 116 139;
-    --primary-500: 62 168 255;
+    --card-foreground: 11 16 38;
+    --border: 209 216 232;
+    --muted: 232 236 244;
+    --muted-foreground: 85 97 137;
+    --primary-500: 247 171 0;
+    --accent-500: 0 229 255;
   }
 
   .dark {
-    --background: 2 6 23;
-    --foreground: 248 250 252;
-    --card: 15 23 42;
-    --card-foreground: 248 250 252;
-    --border: 51 65 85;
-    --muted: 15 23 42;
-    --muted-foreground: 148 163 184;
-    --primary-500: 62 168 255;
+    --background: 11 16 38;
+    --foreground: 247 250 255;
+    --card: 26 31 48;
+    --card-foreground: 247 250 255;
+    --border: 61 70 101;
+    --muted: 26 31 48;
+    --muted-foreground: 168 180 204;
+    --primary-500: 247 171 0;
+    --accent-500: 0 229 255;
   }
 }
 
