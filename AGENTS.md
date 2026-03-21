@@ -7,6 +7,7 @@
 | 領域 | パス |
 |------|------|
 | Web アプリ | `apps/web/AGENTS.md` |
+| HP（ランディング等） | `apps/hp/AGENTS.md` |
 | API | `apps/api/AGENTS.md` |
 | モバイル | `apps/mobile/AGENTS.md` |
 | API ドキュメント（Scalar） | `apps/api-docs/AGENTS.md` |
