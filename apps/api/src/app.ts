@@ -5,10 +5,8 @@ import { prettyJSON } from "hono/pretty-json";
 
 import { trustedOriginsForRequest } from "./lib/trusted-origins";
 import { appCorsMiddleware } from "./middleware/app-cors";
-import mobileAuthRoutes from "./routes/mobile-auth";
 import type { AppEnv } from "./types/app-env";
 
-// 生成されたルートをインポート
 import generatedRoutes from "./generated/routes";
 
 const app = new Hono<AppEnv>();
@@ -60,16 +58,14 @@ const sessionMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
 
 app.use("/api/tasks/*", sessionMiddleware);
 
-app.route("/", mobileAuthRoutes);
+// 生成ルートを Better Auth の /api/auth/* より先にマウント（/api/auth/mobile/* を確実に一致させる）
+app.route("/", generatedRoutes);
 
 // Better Auth ハンドラー（/api/auth/* へのその他すべてのリクエストを処理）
 app.on(["POST", "GET"], "/api/auth/*", (c) => {
   const auth = c.get("auth");
   return auth.handler(c.req.raw);
 });
-
-// 生成されたルートをマウント
-app.route("/", generatedRoutes);
 
 // Root endpoint
 app.get("/", (c) => {

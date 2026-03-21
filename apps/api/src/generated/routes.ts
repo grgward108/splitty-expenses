@@ -5,6 +5,8 @@
  * OpenAPI spec version: 0.0.0
  */
 import { Hono } from 'hono';
+import { mobileAuthCallbackHandlers } from '../handlers/mobileAuthCallback';
+import { mobileAuthGoogleHandlers } from '../handlers/mobileAuthGoogle';
 import { healthCheckHandlers } from '../handlers/healthCheck';
 import { tasksListHandlers } from '../handlers/tasksList';
 import { tasksCreateHandlers } from '../handlers/tasksCreate';
@@ -14,6 +16,8 @@ import { tasksDeleteHandlers } from '../handlers/tasksDelete';
 
 const app = new Hono()
 
+app.get('/api/auth/mobile/callback',...mobileAuthCallbackHandlers);
+app.get('/api/auth/mobile/google',...mobileAuthGoogleHandlers);
 app.get('/api/health',...healthCheckHandlers);
 app.get('/api/tasks',...tasksListHandlers);
 app.post('/api/tasks',...tasksCreateHandlers);

@@ -9,6 +9,7 @@ export * from './createTaskRequest';
 export * from './errorResponse';
 export * from './healthCheck200';
 export * from './healthCheck200Status';
+export * from './mobileOAuthInitError';
 export * from './paginationQueryLimitParameter';
 export * from './paginationQueryPageParameter';
 export * from './task';
