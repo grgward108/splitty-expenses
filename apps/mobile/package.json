@@ -29,6 +29,7 @@
     "@capacitor/status-bar": "^6.0.2",
     "@ionic/react": "^8.4.1",
     "@ionic/react-router": "^8.4.1",
+    "@repo/i18n": "workspace:*",
     "@repo/core": "workspace:*",
     "@repo/spec": "workspace:*",
     "@repo/tailwind-config": "workspace:*",

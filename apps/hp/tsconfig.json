@@ -10,6 +10,7 @@
     "types": ["vite/client"],
     "paths": {
       "@/*": ["./src/*"],
+      "@repo/i18n": ["../../packages/i18n/dist/index.d.ts"],
       "@repo/ui": ["../../packages/ui/dist/index.d.ts"]
     }
   },

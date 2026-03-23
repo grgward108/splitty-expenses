@@ -12,6 +12,7 @@
     "deploy": "wrangler pages deploy"
   },
   "dependencies": {
+    "@repo/i18n": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.62.7",

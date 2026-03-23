@@ -1,0 +1,30 @@
+{
+  "pageTitle": "タスク",
+  "addTask": "タスク追加",
+  "notFound": "タスクが見つかりません",
+  "dueDate": "期限: {{date}}",
+  "newTask": "新しいタスク",
+  "newTaskDescription": "タスクを追加して作業を管理しましょう。",
+  "editTask": "タスクを編集",
+  "editTaskDescription": "タスクの内容を変更します。",
+  "deleteTask": "タスクを削除",
+  "deleteTaskConfirm": "このタスクを削除してもよろしいですか？この操作は取り消せません。",
+  "taskTitle": "タイトル",
+  "taskTitlePlaceholder": "例: レポートを作成する",
+  "descriptionOptional": "説明（任意）",
+  "descriptionPlaceholder": "タスクの詳細を入力...",
+  "status": "ステータス",
+  "createTask": "タスク作成",
+  "loadFailed": "タスクの読み込みに失敗しました",
+  "loadLoading": "タスクを読み込み中...",
+  "myTasks": "マイタスク",
+  "taskCount": "{{count}} 件のタスク",
+  "emptyMobile": "タスクがまだありません",
+  "calendarIcon": "カレンダーアイコン",
+  "addTaskAria": "タスクを追加",
+  "statusLabels": {
+    "pending": "未着手",
+    "in_progress": "進行中",
+    "completed": "完了"
+  }
+}

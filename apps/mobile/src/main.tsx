@@ -1,3 +1,4 @@
+import { initI18n } from "@repo/i18n";
 import { setAuthToken, setBaseUrl } from "@repo/spec/fetcher";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRoot } from "react-dom/client";
@@ -51,6 +52,8 @@ function renderApp() {
 }
 
 async function init() {
+  await initI18n();
+
   // API ベース URL を設定
   setBaseUrl(import.meta.env.BETTER_AUTH_URL || "http://localhost:3000");
 

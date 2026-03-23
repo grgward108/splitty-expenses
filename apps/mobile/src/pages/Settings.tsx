@@ -1,6 +1,17 @@
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { IonContent, IonIcon, IonPage } from "@ionic/react";
-import { Alert, AlertDescription, AlertTitle, Button, Card, Heading, Switch, Text } from "@repo/ui";
+import { useTranslation } from "@repo/i18n";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  Card,
+  Heading,
+  Label,
+  Switch,
+  Text,
+} from "@repo/ui";
 import { camera, logOutOutline, moon, sunny } from "ionicons/icons";
 import { useEffect, useState } from "react";
 
@@ -8,6 +19,9 @@ import { useAuth } from "@/hooks/use-auth";
 
 function SettingsPage() {
   const { signOut } = useAuth();
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
+  const { i18n } = useTranslation();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
@@ -42,8 +56,8 @@ function SettingsPage() {
     setIsDark(newValue);
     setAlertMessage({
       type: "success",
-      title: "設定が更新されました",
-      message: `ダークモードが${newValue ? "有効" : "無効"}になりました。`,
+      title: t("mobile.settingsUpdated"),
+      message: newValue ? t("mobile.darkModeEnabled") : t("mobile.darkModeDisabled"),
     });
     setTimeout(() => setAlertMessage(null), 3000);
   };
@@ -72,17 +86,17 @@ function SettingsPage() {
         setCapturedPhoto(photo.webPath);
         setAlertMessage({
           type: "success",
-          title: "写真を保存しました",
-          message: "撮影した写真がフォトライブラリに保存されました。",
+          title: t("mobile.photoSavedTitle"),
+          message: t("mobile.photoSavedMessage"),
         });
         setTimeout(() => setAlertMessage(null), 3000);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "不明なエラー";
+      const errorMessage = error instanceof Error ? error.message : tCommon("unknownError");
       if (!errorMessage.includes("cancelled") && !errorMessage.includes("User cancelled")) {
         setAlertMessage({
           type: "error",
-          title: "撮影に失敗しました",
+          title: t("mobile.captureFailedTitle"),
           message: errorMessage,
         });
         setTimeout(() => setAlertMessage(null), 3000);
@@ -91,6 +105,8 @@ function SettingsPage() {
       setIsCapturing(false);
     }
   };
+
+  const languageValue = i18n.language.startsWith("ja") ? "ja" : "en";
 
   return (
     <IonPage>
@@ -101,7 +117,33 @@ function SettingsPage() {
               level={4}
               className="px-1 text-secondary-500 dark:text-secondary-400 uppercase text-xs tracking-widest font-bold"
             >
-              外観
+              {t("language")}
+            </Heading>
+            <Card variant="modern" className="overflow-hidden p-4">
+              <div className="space-y-2">
+                <Label htmlFor="language-select-mobile">{t("language")}</Label>
+                <select
+                  id="language-select-mobile"
+                  value={languageValue}
+                  onChange={(e) => void i18n.changeLanguage(e.target.value)}
+                  className="flex h-10 w-full rounded-xl border border-secondary-200 bg-secondary-50 px-3 py-2 text-sm text-secondary-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-secondary-700 dark:bg-secondary-950 dark:text-secondary-100"
+                >
+                  <option value="ja">{t("languageJa")}</option>
+                  <option value="en">{t("languageEn")}</option>
+                </select>
+                <Text size="sm" color="muted">
+                  {t("languageDescription")}
+                </Text>
+              </div>
+            </Card>
+          </section>
+
+          <section className="space-y-3">
+            <Heading
+              level={4}
+              className="px-1 text-secondary-500 dark:text-secondary-400 uppercase text-xs tracking-widest font-bold"
+            >
+              {t("mobile.appearance")}
             </Heading>
             <Card variant="modern" className="overflow-hidden p-4">
               <div className="flex items-center justify-between">
@@ -111,10 +153,10 @@ function SettingsPage() {
                   </div>
                   <div>
                     <Text weight="semibold" className="text-secondary-900 dark:text-secondary-100">
-                      ダークモード
+                      {t("mobile.darkMode")}
                     </Text>
                     <Text size="sm" color="muted">
-                      {isDark ? "オン" : "オフ"}
+                      {isDark ? t("mobile.on") : t("mobile.off")}
                     </Text>
                   </div>
                 </div>
@@ -128,7 +170,7 @@ function SettingsPage() {
               level={4}
               className="px-1 text-secondary-500 dark:text-secondary-400 uppercase text-xs tracking-widest font-bold"
             >
-              カメラ
+              {t("mobile.camera")}
             </Heading>
             <Card variant="modern" className="overflow-hidden p-4">
               <div className="space-y-4">
@@ -142,27 +184,27 @@ function SettingsPage() {
                         weight="semibold"
                         className="text-secondary-900 dark:text-secondary-100"
                       >
-                        写真を撮影
+                        {t("mobile.takePhoto")}
                       </Text>
                       <Text size="sm" color="muted">
-                        撮影した写真はフォトライブラリに保存されます
+                        {t("mobile.takePhotoHint")}
                       </Text>
                     </div>
                   </div>
                 </div>
 
                 <Button onClick={handleTakePhoto} disabled={isCapturing} className="w-full">
-                  {isCapturing ? "撮影中..." : "カメラを起動"}
+                  {isCapturing ? t("mobile.capturing") : t("mobile.launchCamera")}
                 </Button>
 
                 {capturedPhoto && (
                   <div className="space-y-2">
                     <Text size="sm" color="muted">
-                      最後に撮影した写真:
+                      {t("mobile.lastPhoto")}
                     </Text>
                     <img
                       src={capturedPhoto}
-                      alt="撮影した写真"
+                      alt={t("mobile.capturedPhotoAlt")}
                       className="w-full rounded-xl object-cover aspect-video"
                     />
                   </div>
@@ -175,7 +217,7 @@ function SettingsPage() {
               level={4}
               className="px-1 text-secondary-500 dark:text-secondary-400 uppercase text-xs tracking-widest font-bold"
             >
-              アカウント
+              {t("mobile.account")}
             </Heading>
             <Card variant="modern" className="overflow-hidden p-4">
               <div className="flex items-center gap-4 mb-4">
@@ -184,10 +226,10 @@ function SettingsPage() {
                 </div>
                 <div>
                   <Text weight="semibold" className="text-secondary-900 dark:text-secondary-100">
-                    サインアウト
+                    {t("mobile.signOut")}
                   </Text>
                   <Text size="sm" color="muted">
-                    Google アカウントからサインアウト
+                    {t("mobile.signOutHint")}
                   </Text>
                 </div>
               </div>
@@ -197,7 +239,7 @@ function SettingsPage() {
                 disabled={isSigningOut}
                 className="w-full"
               >
-                {isSigningOut ? "サインアウト中..." : "サインアウト"}
+                {isSigningOut ? t("mobile.signingOut") : t("mobile.signOut")}
               </Button>
             </Card>
           </section>

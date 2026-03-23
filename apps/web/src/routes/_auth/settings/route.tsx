@@ -1,5 +1,6 @@
 import { useTheme } from "@/contexts/theme";
 import { authClient } from "@/lib/auth-client";
+import { useTranslation } from "@repo/i18n";
 import { useEmailSendTest } from "@repo/spec/client/email/email";
 import {
   Avatar,
@@ -24,6 +25,9 @@ export const Route = createFileRoute("/_auth/settings")({
 });
 
 function SettingsPage() {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
+  const { i18n } = useTranslation();
   const { data: session } = authClient.useSession();
   const { isDark, setIsDark } = useTheme();
   const [formData, setFormData] = useState<SettingsFormData>({
@@ -57,14 +61,17 @@ function SettingsPage() {
       setTestEmailMessage({
         type: "success",
         text: body.id
-          ? `${body.message ?? "送信しました"}（ID: ${body.id}）`
-          : (body.message ?? "送信しました"),
+          ? t("testEmailSentWithId", {
+              message: body.message ?? t("sent"),
+              id: body.id,
+            })
+          : (body.message ?? t("sent")),
       });
     } catch (err: unknown) {
       const e = err as { message?: string; code?: string };
       setTestEmailMessage({
         type: "error",
-        text: e.message ?? "テストメールの送信に失敗しました",
+        text: e.message ?? t("testEmailSendFailed"),
       });
     }
   };
@@ -78,26 +85,30 @@ function SettingsPage() {
         name: formData.name,
       });
       if (result.error) {
-        setMessage({ type: "error", text: result.error.message ?? "更新に失敗しました" });
+        setMessage({ type: "error", text: result.error.message ?? t("updateFailed") });
         return;
       }
-      setMessage({ type: "success", text: "プロフィールを更新しました" });
+      setMessage({ type: "success", text: t("profileUpdated") });
     } catch {
-      setMessage({ type: "error", text: "更新に失敗しました" });
+      setMessage({ type: "error", text: t("updateFailed") });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const languageValue = i18n.language.startsWith("ja") ? "ja" : "en";
+
   return (
     <div className="space-y-6 w-full">
-      <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">設定</h1>
+      <h1 className="text-2xl font-bold text-secondary-900 dark:text-secondary-100">
+        {t("pageTitle")}
+      </h1>
 
       <Card>
         <CardHeader>
-          <Heading level={3}>プロフィール</Heading>
+          <Heading level={3}>{t("profile")}</Heading>
           <Text color="muted" size="sm">
-            表示名とプロフィール画像を管理します。
+            {t("profileDescription")}
           </Text>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -112,13 +123,13 @@ function SettingsPage() {
               )}
             </Avatar>
             <div className="text-sm text-secondary-500 dark:text-secondary-400">
-              <p>プロフィール画像は Google アカウントから取得しています。</p>
+              <p>{t("profileImageFromGoogle")}</p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">メールアドレス</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -127,15 +138,15 @@ function SettingsPage() {
                 className="bg-secondary-100 dark:bg-secondary-800"
               />
               <p className="text-xs text-secondary-500 dark:text-secondary-400">
-                メールアドレスは変更できません
+                {t("emailCannotChange")}
               </p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="name">表示名</Label>
+              <Label htmlFor="name">{t("displayName")}</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="表示名"
+                placeholder={t("displayNamePlaceholder")}
                 value={formData.name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
               />
@@ -153,7 +164,7 @@ function SettingsPage() {
             )}
             <div className="flex justify-end">
               <Button type="submit" variant="primary" disabled={isSubmitting}>
-                {isSubmitting ? "保存中..." : "保存"}
+                {isSubmitting ? tCommon("saving") : tCommon("save")}
               </Button>
             </div>
           </form>
@@ -162,31 +173,23 @@ function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <Heading level={3}>メール（テスト）</Heading>
+          <Heading level={3}>{t("emailTest")}</Heading>
           <Text color="muted" size="sm">
-            Resend 経由でテストメールを送信します。API に{" "}
-            <code className="rounded bg-secondary-100 px-1 py-0.5 text-xs dark:bg-secondary-800">
-              RESEND_API_KEY
-            </code>{" "}
-            と{" "}
-            <code className="rounded bg-secondary-100 px-1 py-0.5 text-xs dark:bg-secondary-800">
-              RESEND_FROM_EMAIL
-            </code>{" "}
-            が必要です。
+            {t("emailTestDescription")}
           </Text>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="test-email-to">送信先（任意）</Label>
+            <Label htmlFor="test-email-to">{t("testEmailTo")}</Label>
             <Input
               id="test-email-to"
               type="email"
-              placeholder={user.email ?? "空欄ならアカウントのメールへ送信"}
+              placeholder={t("testEmailPlaceholder")}
               value={testEmailTo}
               onChange={(e) => setTestEmailTo(e.target.value)}
             />
             <p className="text-xs text-secondary-500 dark:text-secondary-400">
-              空欄のときはログイン中のメールアドレス（{user.email ?? "未設定"}）に送ります。
+              {t("testEmailHint", { email: user.email ?? tCommon("notSet") })}
             </p>
           </div>
           {testEmailMessage && (
@@ -207,7 +210,7 @@ function SettingsPage() {
               disabled={sendTestEmailMutation.isPending}
               onClick={() => void handleSendTestEmail()}
             >
-              {sendTestEmailMutation.isPending ? "送信中..." : "テストメールを送る"}
+              {sendTestEmailMutation.isPending ? t("sendingTestEmail") : t("sendTestEmail")}
             </Button>
           </div>
         </CardContent>
@@ -215,21 +218,44 @@ function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <Heading level={3}>表示</Heading>
+          <Heading level={3}>{t("language")}</Heading>
           <Text color="muted" size="sm">
-            ナイトモードのオン・オフを切り替えます。
+            {t("languageDescription")}
+          </Text>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label htmlFor="language-select">{t("language")}</Label>
+            <select
+              id="language-select"
+              value={languageValue}
+              onChange={(e) => void i18n.changeLanguage(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-secondary-200 bg-white px-3 py-2 text-sm text-secondary-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-100"
+            >
+              <option value="ja">{t("languageJa")}</option>
+              <option value="en">{t("languageEn")}</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <Heading level={3}>{t("display")}</Heading>
+          <Text color="muted" size="sm">
+            {t("nightModeDescription")}
           </Text>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <Label htmlFor="night-mode" className="cursor-pointer">
-              ナイトモード
+              {t("nightMode")}
             </Label>
             <Switch
               id="night-mode"
               checked={isDark}
               onCheckedChange={setIsDark}
-              aria-label="ナイトモード"
+              aria-label={t("nightModeAria")}
             />
           </div>
         </CardContent>

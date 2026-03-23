@@ -5,6 +5,7 @@ import {
   IonRefresherContent,
   type RefresherEventDetail,
 } from "@ionic/react";
+import { getLocaleForDate, useTranslation } from "@repo/i18n";
 import {
   useTasksCreate,
   useTasksDelete,
@@ -33,12 +34,6 @@ import { useState } from "react";
 
 type TaskStatus = "pending" | "in_progress" | "completed";
 
-const statusLabels: Record<TaskStatus, string> = {
-  pending: "未着手",
-  in_progress: "進行中",
-  completed: "完了",
-};
-
 const statusColors: Record<TaskStatus, "default" | "warning" | "success"> = {
   pending: "default",
   in_progress: "warning",
@@ -61,6 +56,9 @@ type TaskFormData = {
 };
 
 function TasksPage() {
+  const { t } = useTranslation("tasks");
+  const { t: tCommon } = useTranslation("common");
+  const { i18n } = useTranslation();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskFormData | null>(null);
   const [newTaskTitle, setNewTaskTitle] = useState("");
@@ -147,7 +145,7 @@ function TasksPage() {
     return (
       <IonPage>
         <IonContent fullscreen className="ion-padding">
-          <PageLoader message="タスクを読み込み中..." />
+          <PageLoader message={t("loadLoading")} />
         </IonContent>
       </IonPage>
     );
@@ -162,15 +160,15 @@ function TasksPage() {
 
         <div className="space-y-6 pb-20">
           <div className="px-1">
-            <Heading level={3}>マイタスク</Heading>
+            <Heading level={3}>{t("myTasks")}</Heading>
             <Text size="sm" color="muted">
-              {tasks.length} 件のタスク
+              {t("taskCount", { count: tasks.length })}
             </Text>
           </div>
 
           {tasks.length === 0 ? (
             <div className="text-center py-12">
-              <Text color="muted">タスクがまだありません</Text>
+              <Text color="muted">{t("emptyMobile")}</Text>
             </div>
           ) : (
             <div className="space-y-4">
@@ -189,7 +187,7 @@ function TasksPage() {
                         {task.title}
                       </Heading>
                       <Badge variant={statusColors[task.status as TaskStatus]}>
-                        {statusLabels[task.status as TaskStatus]}
+                        {t(`statusLabels.${task.status as TaskStatus}`)}
                       </Badge>
                     </div>
 
@@ -207,7 +205,7 @@ function TasksPage() {
                           viewBox="0 0 24 24"
                           stroke="currentColor"
                         >
-                          <title>カレンダーアイコン</title>
+                          <title>{t("calendarIcon")}</title>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -215,7 +213,11 @@ function TasksPage() {
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                           />
                         </svg>
-                        期限: {new Date(task.dueDate).toLocaleDateString("ja-JP")}
+                        {t("dueDate", {
+                          date: new Date(task.dueDate).toLocaleDateString(
+                            getLocaleForDate(i18n.language)
+                          ),
+                        })}
                       </Text>
                     )}
 
@@ -232,7 +234,7 @@ function TasksPage() {
                           viewBox="0 0 24 24"
                           stroke="currentColor"
                         >
-                          <title>編集</title>
+                          <title>{tCommon("edit")}</title>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -240,7 +242,7 @@ function TasksPage() {
                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                           />
                         </svg>
-                        編集
+                        {tCommon("edit")}
                       </Button>
                       <Button
                         variant="ghost"
@@ -254,7 +256,7 @@ function TasksPage() {
                           viewBox="0 0 24 24"
                           stroke="currentColor"
                         >
-                          <title>削除</title>
+                          <title>{tCommon("delete")}</title>
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -262,7 +264,7 @@ function TasksPage() {
                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                           />
                         </svg>
-                        削除
+                        {tCommon("delete")}
                       </Button>
                     </div>
                   </div>
@@ -277,7 +279,7 @@ function TasksPage() {
           variant="gradient"
           onClick={() => setIsDialogOpen(true)}
           className="fixed bottom-4 right-4 rounded-2xl shadow-2xl shadow-primary-500/30 z-10 p-0 flex items-center justify-center text-3xl font-bold"
-          aria-label="タスクを追加"
+          aria-label={t("addTaskAria")}
         >
           +
         </Button>
@@ -290,18 +292,18 @@ function TasksPage() {
           <DialogContent className="max-h-[85vh] overflow-y-auto rounded-3xl border-none shadow-2xl">
             <DialogClose onClick={() => setIsDialogOpen(false)} />
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">新しいタスク</DialogTitle>
-              <DialogDescription>タスクを追加して作業を管理しましょう。</DialogDescription>
+              <DialogTitle className="text-2xl font-bold">{t("newTask")}</DialogTitle>
+              <DialogDescription>{t("newTaskDescription")}</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6 py-6">
               <div className="space-y-2">
                 <Label htmlFor="title" className="text-sm font-semibold ml-1">
-                  タイトル
+                  {t("taskTitle")}
                 </Label>
                 <Input
                   id="title"
-                  placeholder="例: レポートを作成する"
+                  placeholder={t("taskTitlePlaceholder")}
                   value={newTaskTitle}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setNewTaskTitle(e.target.value)
@@ -311,11 +313,11 @@ function TasksPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description" className="text-sm font-semibold ml-1">
-                  説明（任意）
+                  {t("descriptionOptional")}
                 </Label>
                 <Textarea
                   id="description"
-                  placeholder="タスクの詳細を入力..."
+                  placeholder={t("descriptionPlaceholder")}
                   value={newTaskDescription}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                     setNewTaskDescription(e.target.value)
@@ -325,7 +327,7 @@ function TasksPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="status" className="text-sm font-semibold ml-1">
-                  ステータス
+                  {t("status")}
                 </Label>
                 <div className="flex gap-2">
                   {(["pending", "in_progress", "completed"] as TaskStatus[]).map((status) => (
@@ -336,7 +338,7 @@ function TasksPage() {
                       onClick={() => setNewTaskStatus(status)}
                       className="flex-1 rounded-xl h-10"
                     >
-                      {statusLabels[status]}
+                      {t(`statusLabels.${status}`)}
                     </Button>
                   ))}
                 </div>
@@ -345,10 +347,10 @@ function TasksPage() {
 
             <DialogFooter className="gap-3 pt-2">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                キャンセル
+                {tCommon("cancel")}
               </Button>
               <Button variant="gradient" onClick={handleAddTask}>
-                タスク作成
+                {t("createTask")}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -363,18 +365,18 @@ function TasksPage() {
           <DialogContent className="max-h-[85vh] overflow-y-auto rounded-3xl border-none shadow-2xl">
             <DialogClose onClick={() => setEditingTask(null)} />
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">タスクを編集</DialogTitle>
-              <DialogDescription>タスクの内容を変更します。</DialogDescription>
+              <DialogTitle className="text-2xl font-bold">{t("editTask")}</DialogTitle>
+              <DialogDescription>{t("editTaskDescription")}</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-6 py-6">
               <div className="space-y-2">
                 <Label htmlFor="edit-title" className="text-sm font-semibold ml-1">
-                  タイトル
+                  {t("taskTitle")}
                 </Label>
                 <Input
                   id="edit-title"
-                  placeholder="例: レポートを作成する"
+                  placeholder={t("taskTitlePlaceholder")}
                   value={editingTask?.title || ""}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setEditingTask((prev) => (prev ? { ...prev, title: e.target.value } : null))
@@ -384,11 +386,11 @@ function TasksPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-description" className="text-sm font-semibold ml-1">
-                  説明（任意）
+                  {t("descriptionOptional")}
                 </Label>
                 <Textarea
                   id="edit-description"
-                  placeholder="タスクの詳細を入力..."
+                  placeholder={t("descriptionPlaceholder")}
                   value={editingTask?.description || ""}
                   onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                     setEditingTask((prev) =>
@@ -400,7 +402,7 @@ function TasksPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-status" className="text-sm font-semibold ml-1">
-                  ステータス
+                  {t("status")}
                 </Label>
                 <div className="flex gap-2">
                   {(["pending", "in_progress", "completed"] as TaskStatus[]).map((status) => (
@@ -411,7 +413,7 @@ function TasksPage() {
                       onClick={() => setEditingTask((prev) => (prev ? { ...prev, status } : null))}
                       className="flex-1 rounded-xl h-10"
                     >
-                      {statusLabels[status]}
+                      {t(`statusLabels.${status}`)}
                     </Button>
                   ))}
                 </div>
@@ -420,10 +422,10 @@ function TasksPage() {
 
             <DialogFooter className="gap-3 pt-2">
               <Button variant="outline" onClick={() => setEditingTask(null)}>
-                キャンセル
+                {tCommon("cancel")}
               </Button>
               <Button variant="gradient" onClick={handleEditTask}>
-                保存
+                {tCommon("save")}
               </Button>
             </DialogFooter>
           </DialogContent>
