@@ -1,11 +1,5 @@
 {
-  "appName": "Monorepo App",
-  "loadingUser": "Loading user information",
-  "openUserMenu": "Open user menu",
-  "user": "User",
-  "settings": "Settings",
-  "logout": "Log out",
-  "login": "Log in",
+  "appName": "Splitty",
   "loading": "Loading...",
   "retry": "Retry",
   "save": "Save",
@@ -13,6 +7,11 @@
   "cancel": "Cancel",
   "delete": "Delete",
   "edit": "Edit",
-  "unknownError": "Unknown error",
-  "notSet": "Not set"
+  "add": "Add",
+  "confirm": "Confirm",
+  "back": "Back",
+  "share": "Share",
+  "copied": "Copied!",
+  "unknownError": "Something went wrong",
+  "notFound": "Not found"
 }

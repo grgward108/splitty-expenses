@@ -1,0 +1,12 @@
+{
+  "title": "Create a Group",
+  "groupName": "Group name",
+  "groupNamePlaceholder": "Trip to Bali, Roommates, etc.",
+  "currency": "Currency",
+  "members": "Members",
+  "addMember": "Add member",
+  "memberName": "Name",
+  "createGroup": "Create Group",
+  "needAtLeastTwo": "Add at least 2 members",
+  "recentGroups": "Recent Groups"
+}

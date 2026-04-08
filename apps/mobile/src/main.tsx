@@ -1,9 +1,8 @@
 import { initI18n } from "@repo/i18n";
-import { setAuthToken, setBaseUrl } from "@repo/spec/fetcher";
+import { setBaseUrl } from "@repo/spec/fetcher";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRoot } from "react-dom/client";
 import App from "./App";
-import { getToken } from "./lib/token-storage";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -53,21 +52,7 @@ function renderApp() {
 
 async function init() {
   await initI18n();
-
-  // API ベース URL を設定
-  setBaseUrl(import.meta.env.BETTER_AUTH_URL || "http://localhost:3000");
-
-  try {
-    // Preferences から保存済みセッショントークンを復元し、
-    // React レンダリング前にメモリに設定することでセッション取得を確実にする
-    const token = await getToken();
-    if (token) {
-      setAuthToken(token);
-    }
-  } catch {
-    // Preferences の読み込みに失敗してもアプリのレンダリングは継続する
-  }
-
+  setBaseUrl(import.meta.env.VITE_API_URL || "http://localhost:3000");
   renderApp();
 }
 

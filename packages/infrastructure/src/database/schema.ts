@@ -1,65 +1,59 @@
-import { boolean, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { pgEnum, pgTable, text } from "drizzle-orm/pg-core";
 
-export const taskStatusEnum = pgEnum("task_status", ["pending", "in_progress", "completed"]);
+export const splitTypeEnum = pgEnum("split_type", ["equal", "exact"]);
 
-export const tasks = pgTable("tasks", {
+export const categoryEnum = pgEnum("expense_category", [
+  "food",
+  "transport",
+  "accommodation",
+  "entertainment",
+  "shopping",
+  "utilities",
+  "other",
+]);
+
+export const groups = pgTable("groups", {
   id: text("id").primaryKey(),
-  userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  description: text("description"),
-  status: taskStatusEnum("status").notNull().default("pending"),
-  dueDate: text("due_date"),
+  name: text("name").notNull(),
+  currency: text("currency").notNull().default("USD"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });
 
-// Better Auth 用テーブル
-export const user = pgTable("user", {
+export const members = pgTable("members", {
   id: text("id").primaryKey(),
+  groupId: text("group_id")
+    .notNull()
+    .references(() => groups.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
-  email: text("email").notNull(),
-  emailVerified: boolean("email_verified").notNull(),
-  image: text("image"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+  emoji: text("emoji").notNull().default("😀"),
+  createdAt: text("created_at").notNull(),
 });
 
-export const session = pgTable("session", {
+export const expenses = pgTable("expenses", {
   id: text("id").primaryKey(),
-  userId: text("user_id")
+  groupId: text("group_id")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  token: text("token").notNull(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
-});
-
-export const account = pgTable("account", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
+    .references(() => groups.id, { onDelete: "cascade" }),
+  description: text("description").notNull(),
+  amount: text("amount").notNull(),
+  paidByMemberId: text("paid_by_member_id")
     .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  accountId: text("account_id").notNull(),
-  providerId: text("provider_id").notNull(),
-  accessToken: text("access_token"),
-  refreshToken: text("refresh_token"),
-  accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true }),
-  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true }),
-  scope: text("scope"),
-  idToken: text("id_token"),
-  password: text("password"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+    .references(() => members.id, { onDelete: "cascade" }),
+  splitType: splitTypeEnum("split_type").notNull().default("equal"),
+  category: categoryEnum("category").notNull().default("other"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
 });
 
-export const verification = pgTable("verification", {
+export const expenseSplits = pgTable("expense_splits", {
   id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
+  expenseId: text("expense_id")
+    .notNull()
+    .references(() => expenses.id, { onDelete: "cascade" }),
+  memberId: text("member_id")
+    .notNull()
+    .references(() => members.id, { onDelete: "cascade" }),
+  amount: text("amount").notNull(),
+  createdAt: text("created_at").notNull(),
 });

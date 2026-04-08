@@ -1,0 +1,14 @@
+{
+  "expenses": "支出",
+  "balances": "残高",
+  "members": "メンバー",
+  "addExpense": "支出を追加",
+  "noExpenses": "まだ支出がありません",
+  "noExpensesHint": "最初の支出を追加しましょう",
+  "totalExpenses": "合計: {{amount}}",
+  "shareGroup": "グループを共有",
+  "shareLinkCopied": "リンクをコピーしました！",
+  "groupNotFound": "グループが見つかりません",
+  "paidBy": "支払い",
+  "splitAmong": "{{count}}人で割り勘"
+}

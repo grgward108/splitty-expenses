@@ -8,7 +8,10 @@ export type Brand<T, B> = T & { __brand: B };
 /**
  * Common ID types
  */
-export type TaskId = Brand<string, "TaskId">;
+export type GroupId = Brand<string, "GroupId">;
+export type MemberId = Brand<string, "MemberId">;
+export type ExpenseId = Brand<string, "ExpenseId">;
+export type ExpenseSplitId = Brand<string, "ExpenseSplitId">;
 
 /**
  * Pagination types

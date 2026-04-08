@@ -1,11 +1,5 @@
 {
-  "appName": "モノレポアプリ",
-  "loadingUser": "ユーザー情報を読み込み中",
-  "openUserMenu": "ユーザーメニューを開く",
-  "user": "ユーザー",
-  "settings": "設定",
-  "logout": "ログアウト",
-  "login": "ログイン",
+  "appName": "Splitty",
   "loading": "読み込み中...",
   "retry": "再試行",
   "save": "保存",
@@ -13,6 +7,11 @@
   "cancel": "キャンセル",
   "delete": "削除",
   "edit": "編集",
-  "unknownError": "不明なエラー",
-  "notSet": "未設定"
+  "add": "追加",
+  "confirm": "確認",
+  "back": "戻る",
+  "share": "共有",
+  "copied": "コピーしました！",
+  "unknownError": "エラーが発生しました",
+  "notFound": "見つかりません"
 }

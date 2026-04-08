@@ -2,31 +2,31 @@ import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
 
-import enAuth from "./locales/en/auth.json";
 import enCommon from "./locales/en/common.json";
-import enLanding from "./locales/en/landing.json";
-import enSettings from "./locales/en/settings.json";
-import enTasks from "./locales/en/tasks.json";
-import jaAuth from "./locales/ja/auth.json";
+import enHome from "./locales/en/home.json";
+import enGroups from "./locales/en/groups.json";
+import enExpenses from "./locales/en/expenses.json";
+import enBalances from "./locales/en/balances.json";
 import jaCommon from "./locales/ja/common.json";
-import jaLanding from "./locales/ja/landing.json";
-import jaSettings from "./locales/ja/settings.json";
-import jaTasks from "./locales/ja/tasks.json";
+import jaHome from "./locales/ja/home.json";
+import jaGroups from "./locales/ja/groups.json";
+import jaExpenses from "./locales/ja/expenses.json";
+import jaBalances from "./locales/ja/balances.json";
 
 export const resources = {
   ja: {
     common: jaCommon,
-    auth: jaAuth,
-    tasks: jaTasks,
-    settings: jaSettings,
-    landing: jaLanding,
+    home: jaHome,
+    groups: jaGroups,
+    expenses: jaExpenses,
+    balances: jaBalances,
   },
   en: {
     common: enCommon,
-    auth: enAuth,
-    tasks: enTasks,
-    settings: enSettings,
-    landing: enLanding,
+    home: enHome,
+    groups: enGroups,
+    expenses: enExpenses,
+    balances: enBalances,
   },
 } as const;
 

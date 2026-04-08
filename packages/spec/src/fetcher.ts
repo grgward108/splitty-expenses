@@ -1,22 +1,14 @@
 /**
  * Custom fetch function for Orval-generated client
- * This can be customized to add authentication, logging, etc.
  */
 
 let baseUrl = "http://localhost:3000";
-let authToken: string | null = null;
 
 export const setBaseUrl = (url: string) => {
   baseUrl = url;
 };
 
 export const getBaseUrl = () => baseUrl;
-
-export const setAuthToken = (token: string | null): void => {
-  authToken = token;
-};
-
-export const getAuthToken = (): string | null => authToken;
 
 export const customFetch = async <T>(url: string, options?: RequestInit): Promise<T> => {
   const fullUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
@@ -25,15 +17,12 @@ export const customFetch = async <T>(url: string, options?: RequestInit): Promis
   try {
     response = await fetch(fullUrl, {
       ...options,
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
         ...options?.headers,
       },
     });
   } catch (networkError) {
-    // ネットワークエラー（接続失敗、タイムアウト等）
     const error = new Error(
       `Network error: ${networkError instanceof Error ? networkError.message : "Failed to connect to server"}`
     );

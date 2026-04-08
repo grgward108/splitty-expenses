@@ -8,44 +8,140 @@ using TypeSpec.Rest;
 using TypeSpec.OpenAPI;
 
 @service({
-  title: "Monorepo API",
+  title: "Splitty API",
 })
 @server("http://localhost:3000", "Development server")
-namespace MonorepoApi;
+namespace SplittyApi;
+
+// =====================================
+// Enums
+// =====================================
+
+enum SplitType {
+  equal: "equal",
+  exact: "exact",
+}
+
+enum ExpenseCategory {
+  food: "food",
+  transport: "transport",
+  accommodation: "accommodation",
+  entertainment: "entertainment",
+  shopping: "shopping",
+  utilities: "utilities",
+  other: "other",
+}
 
 // =====================================
 // Models
 // =====================================
 
-// Task status enum
-enum TaskStatus {
-  pending: "pending",
-  in_progress: "in_progress",
-  completed: "completed",
+model Member {
+  id: string;
+  groupId: string;
+  name: string;
+  emoji: string;
+  createdAt: utcDateTime;
 }
 
-model Task {
+model ExpenseSplit {
   id: string;
-  title: string;
-  description?: string;
-  status: TaskStatus;
-  dueDate?: utcDateTime;
+  expenseId: string;
+  memberId: string;
+  amount: string;
+  createdAt: utcDateTime;
+}
+
+model Expense {
+  id: string;
+  groupId: string;
+  description: string;
+  amount: string;
+  paidByMemberId: string;
+  splitType: SplitType;
+  category: ExpenseCategory;
+  splits: ExpenseSplit[];
   createdAt: utcDateTime;
   updatedAt: utcDateTime;
 }
 
-model CreateTaskRequest {
-  title: string;
-  description?: string;
-  status?: TaskStatus = TaskStatus.pending;
-  dueDate?: utcDateTime;
+model Group {
+  id: string;
+  name: string;
+  currency: string;
+  members: Member[];
+  createdAt: utcDateTime;
+  updatedAt: utcDateTime;
 }
 
-model UpdateTaskRequest {
-  title?: string;
+// Request models
+
+model CreateMemberInput {
+  name: string;
+  emoji?: string;
+}
+
+model CreateGroupRequest {
+  name: string;
+  currency?: string;
+  members: CreateMemberInput[];
+}
+
+model AddMemberRequest {
+  name: string;
+  emoji?: string;
+}
+
+model UpdateMemberRequest {
+  name?: string;
+  emoji?: string;
+}
+
+model CreateExpenseSplitInput {
+  memberId: string;
+  amount: string;
+}
+
+model CreateExpenseRequest {
+  description: string;
+  amount: string;
+  paidByMemberId: string;
+  splitType: SplitType;
+  category?: ExpenseCategory;
+  splits: CreateExpenseSplitInput[];
+}
+
+model UpdateExpenseRequest {
   description?: string;
-  status?: TaskStatus;
-  dueDate?: utcDateTime;
+  amount?: string;
+  paidByMemberId?: string;
+  splitType?: SplitType;
+  category?: ExpenseCategory;
+  splits?: CreateExpenseSplitInput[];
+}
+
+// Response models
+
+model Balance {
+  memberId: string;
+  memberName: string;
+  memberEmoji: string;
+  balance: string;
+}
+
+model Debt {
+  fromMemberId: string;
+  fromMemberName: string;
+  fromMemberEmoji: string;
+  toMemberId: string;
+  toMemberName: string;
+  toMemberEmoji: string;
+  amount: string;
+}
+
+model BalanceSummary {
+  balances: Balance[];
+  debts: Debt[];
 }
 
 model PaginatedResponse<T> {
@@ -59,20 +155,6 @@ model PaginatedResponse<T> {
 model ErrorResponse {
   message: string;
   code: string;
-}
-
-model MobileOAuthInitError {
-  error: string;
-}
-
-model SendTestEmailRequest {
-  /** 省略時はログイン中ユーザーのメールアドレスへ送信します。 */
-  to?: string;
-}
-
-model SendTestEmailResponse {
-  message: string;
-  id?: string;
 }
 
 // =====================================
@@ -90,26 +172,73 @@ model PaginationQuery {
 
 @route("/api")
 namespace Api {
-  @route("/tasks")
-  @tag("tasks")
-  namespace Tasks {
-    @get
-    op list(...PaginationQuery): PaginatedResponse<Task> | ErrorResponse;
-
-    @get
-    @route("/{id}")
-    op get(@path id: string): Task | ErrorResponse;
-
+  @route("/groups")
+  @tag("groups")
+  namespace Groups {
     @post
-    op create(@body body: CreateTaskRequest): Task | ErrorResponse;
+    op create(@body body: CreateGroupRequest): Group | ErrorResponse;
+
+    @get
+    @route("/{groupId}")
+    op get(@path groupId: string): Group | ErrorResponse;
+  }
+
+  @route("/groups/{groupId}/members")
+  @tag("members")
+  namespace Members {
+    @post
+    op add(@path groupId: string, @body body: AddMemberRequest): Member | ErrorResponse;
 
     @put
-    @route("/{id}")
-    op update(@path id: string, @body body: UpdateTaskRequest): Task | ErrorResponse;
+    @route("/{memberId}")
+    op update(
+      @path groupId: string,
+      @path memberId: string,
+      @body body: UpdateMemberRequest,
+    ): Member | ErrorResponse;
 
     @delete
-    @route("/{id}")
-    op delete(@path id: string): void | ErrorResponse;
+    @route("/{memberId}")
+    op remove(@path groupId: string, @path memberId: string): void | ErrorResponse;
+  }
+
+  @route("/groups/{groupId}/expenses")
+  @tag("expenses")
+  namespace Expenses {
+    @get
+    op list(@path groupId: string, ...PaginationQuery): PaginatedResponse<Expense> | ErrorResponse;
+
+    @post
+    op create(
+      @path groupId: string,
+      @body body: CreateExpenseRequest,
+    ): Expense | ErrorResponse;
+
+    @get
+    @route("/{expenseId}")
+    op get(
+      @path groupId: string,
+      @path expenseId: string,
+    ): Expense | ErrorResponse;
+
+    @put
+    @route("/{expenseId}")
+    op update(
+      @path groupId: string,
+      @path expenseId: string,
+      @body body: UpdateExpenseRequest,
+    ): Expense | ErrorResponse;
+
+    @delete
+    @route("/{expenseId}")
+    op delete(@path groupId: string, @path expenseId: string): void | ErrorResponse;
+  }
+
+  @route("/groups/{groupId}/balances")
+  @tag("balances")
+  namespace Balances {
+    @get
+    op get(@path groupId: string): BalanceSummary | ErrorResponse;
   }
 
   @route("/health")
@@ -121,39 +250,4 @@ namespace Api {
       timestamp: utcDateTime;
     };
   }
-
-  @route("/auth/mobile")
-  @tag("mobile-auth")
-  namespace MobileAuth {
-    @get
-    @route("/google")
-    op google(): {
-      @statusCode statusCode: 302;
-      @header location: string;
-    } | {
-      @statusCode statusCode: 500;
-      @body body: MobileOAuthInitError;
-    };
-
-    @get
-    @route("/callback")
-    op callback(): {
-      @statusCode statusCode: 302;
-      @header location: string;
-    };
-  }
-
-  @route("/email")
-  @tag("email")
-  namespace Email {
-    @post
-    @route("/test")
-    op sendTest(@body body: SendTestEmailRequest): SendTestEmailResponse | ErrorResponse;
-  }
 }
-
-
-
-
-
-

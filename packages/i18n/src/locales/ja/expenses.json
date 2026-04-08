@@ -1,0 +1,22 @@
+{
+  "addExpense": "支出を追加",
+  "editExpense": "支出を編集",
+  "description": "説明",
+  "descriptionPlaceholder": "夕食、タクシー、ホテル など",
+  "amount": "金額",
+  "paidBy": "支払った人",
+  "splitType": "割り勘方法",
+  "equalSplit": "均等",
+  "exactSplit": "金額指定",
+  "splitAmong": "割り勘メンバー",
+  "category": "カテゴリ",
+  "food": "食事",
+  "transport": "交通",
+  "accommodation": "宿泊",
+  "entertainment": "娯楽",
+  "shopping": "買い物",
+  "utilities": "光熱費",
+  "other": "その他",
+  "deleteConfirm": "この支出を削除しますか？",
+  "splitMismatch": "分割金額の合計が一致しません"
+}

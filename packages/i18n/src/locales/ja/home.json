@@ -1,0 +1,12 @@
+{
+  "title": "グループを作成",
+  "groupName": "グループ名",
+  "groupNamePlaceholder": "バリ旅行、ルームメイト など",
+  "currency": "通貨",
+  "members": "メンバー",
+  "addMember": "メンバーを追加",
+  "memberName": "名前",
+  "createGroup": "グループを作成",
+  "needAtLeastTwo": "2人以上のメンバーを追加してください",
+  "recentGroups": "最近のグループ"
+}

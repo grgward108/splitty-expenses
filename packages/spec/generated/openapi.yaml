@@ -1,50 +1,17 @@
 openapi: 3.0.0
 info:
-  title: Monorepo API
+  title: Splitty API
   version: 0.0.0
 tags:
-  - name: tasks
+  - name: groups
+  - name: members
+  - name: expenses
+  - name: balances
   - name: health
-  - name: mobile-auth
-  - name: email
 paths:
-  /api/auth/mobile/callback:
-    get:
-      operationId: MobileAuth_callback
-      parameters: []
-      responses:
-        '302':
-          description: Redirection
-          headers:
-            location:
-              required: true
-              schema:
-                type: string
-      tags:
-        - mobile-auth
-  /api/auth/mobile/google:
-    get:
-      operationId: MobileAuth_google
-      parameters: []
-      responses:
-        '302':
-          description: Redirection
-          headers:
-            location:
-              required: true
-              schema:
-                type: string
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MobileOAuthInitError'
-      tags:
-        - mobile-auth
-  /api/email/test:
+  /api/groups:
     post:
-      operationId: Email_sendTest
+      operationId: Groups_create
       parameters: []
       responses:
         '200':
@@ -53,16 +20,286 @@ paths:
             application/json:
               schema:
                 anyOf:
-                  - $ref: '#/components/schemas/SendTestEmailResponse'
+                  - $ref: '#/components/schemas/Group'
                   - $ref: '#/components/schemas/ErrorResponse'
       tags:
-        - email
+        - groups
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SendTestEmailRequest'
+              $ref: '#/components/schemas/CreateGroupRequest'
+  /api/groups/{groupId}:
+    get:
+      operationId: Groups_get
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Group'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - groups
+  /api/groups/{groupId}/balances:
+    get:
+      operationId: Balances_get
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/BalanceSummary'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - balances
+  /api/groups/{groupId}/expenses:
+    get:
+      operationId: Expenses_list
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PaginationQuery.page'
+        - $ref: '#/components/parameters/PaginationQuery.limit'
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - type: object
+                    required:
+                      - items
+                      - total
+                      - page
+                      - limit
+                      - totalPages
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Expense'
+                      total:
+                        type: integer
+                        format: int32
+                      page:
+                        type: integer
+                        format: int32
+                      limit:
+                        type: integer
+                        format: int32
+                      totalPages:
+                        type: integer
+                        format: int32
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - expenses
+    post:
+      operationId: Expenses_create
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Expense'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - expenses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExpenseRequest'
+  /api/groups/{groupId}/expenses/{expenseId}:
+    get:
+      operationId: Expenses_get
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: expenseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Expense'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - expenses
+    put:
+      operationId: Expenses_update
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: expenseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Expense'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - expenses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateExpenseRequest'
+    delete:
+      operationId: Expenses_delete
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: expenseId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+      tags:
+        - expenses
+  /api/groups/{groupId}/members:
+    post:
+      operationId: Members_add
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Member'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddMemberRequest'
+  /api/groups/{groupId}/members/{memberId}:
+    put:
+      operationId: Members_update
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/Member'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemberRequest'
+    delete:
+      operationId: Members_remove
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: memberId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+      tags:
+        - members
   /api/health:
     get:
       operationId: Health_check
@@ -88,130 +325,6 @@ paths:
                   - timestamp
       tags:
         - health
-  /api/tasks:
-    get:
-      operationId: Tasks_list
-      parameters:
-        - $ref: '#/components/parameters/PaginationQuery.page'
-        - $ref: '#/components/parameters/PaginationQuery.limit'
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - type: object
-                    required:
-                      - items
-                      - total
-                      - page
-                      - limit
-                      - totalPages
-                    properties:
-                      items:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/Task'
-                      total:
-                        type: integer
-                        format: int32
-                      page:
-                        type: integer
-                        format: int32
-                      limit:
-                        type: integer
-                        format: int32
-                      totalPages:
-                        type: integer
-                        format: int32
-                  - $ref: '#/components/schemas/ErrorResponse'
-      tags:
-        - tasks
-    post:
-      operationId: Tasks_create
-      parameters: []
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Task'
-                  - $ref: '#/components/schemas/ErrorResponse'
-      tags:
-        - tasks
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateTaskRequest'
-  /api/tasks/{id}:
-    get:
-      operationId: Tasks_get
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Task'
-                  - $ref: '#/components/schemas/ErrorResponse'
-      tags:
-        - tasks
-    put:
-      operationId: Tasks_update
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                anyOf:
-                  - $ref: '#/components/schemas/Task'
-                  - $ref: '#/components/schemas/ErrorResponse'
-      tags:
-        - tasks
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UpdateTaskRequest'
-    delete:
-      operationId: Tasks_delete
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: The request has succeeded.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '204':
-          description: 'There is no content to send for this request, but the headers may be useful. '
-      tags:
-        - tasks
 components:
   parameters:
     PaginationQuery.limit:
@@ -233,22 +346,126 @@ components:
         default: 1
       explode: false
   schemas:
-    CreateTaskRequest:
+    AddMemberRequest:
       type: object
       required:
-        - title
+        - name
       properties:
-        title:
+        name:
           type: string
+        emoji:
+          type: string
+    Balance:
+      type: object
+      required:
+        - memberId
+        - memberName
+        - memberEmoji
+        - balance
+      properties:
+        memberId:
+          type: string
+        memberName:
+          type: string
+        memberEmoji:
+          type: string
+        balance:
+          type: string
+    BalanceSummary:
+      type: object
+      required:
+        - balances
+        - debts
+      properties:
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Balance'
+        debts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Debt'
+    CreateExpenseRequest:
+      type: object
+      required:
+        - description
+        - amount
+        - paidByMemberId
+        - splitType
+        - splits
+      properties:
         description:
           type: string
-        status:
-          allOf:
-            - $ref: '#/components/schemas/TaskStatus'
-          default: pending
-        dueDate:
+        amount:
           type: string
-          format: date-time
+        paidByMemberId:
+          type: string
+        splitType:
+          $ref: '#/components/schemas/SplitType'
+        category:
+          $ref: '#/components/schemas/ExpenseCategory'
+        splits:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateExpenseSplitInput'
+    CreateExpenseSplitInput:
+      type: object
+      required:
+        - memberId
+        - amount
+      properties:
+        memberId:
+          type: string
+        amount:
+          type: string
+    CreateGroupRequest:
+      type: object
+      required:
+        - name
+        - members
+      properties:
+        name:
+          type: string
+        currency:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateMemberInput'
+    CreateMemberInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        emoji:
+          type: string
+    Debt:
+      type: object
+      required:
+        - fromMemberId
+        - fromMemberName
+        - fromMemberEmoji
+        - toMemberId
+        - toMemberName
+        - toMemberEmoji
+        - amount
+      properties:
+        fromMemberId:
+          type: string
+        fromMemberName:
+          type: string
+        fromMemberEmoji:
+          type: string
+        toMemberId:
+          type: string
+        toMemberName:
+          type: string
+        toMemberEmoji:
+          type: string
+        amount:
+          type: string
     ErrorResponse:
       type: object
       required:
@@ -259,72 +476,149 @@ components:
           type: string
         code:
           type: string
-    MobileOAuthInitError:
-      type: object
-      required:
-        - error
-      properties:
-        error:
-          type: string
-    SendTestEmailRequest:
-      type: object
-      properties:
-        to:
-          type: string
-          description: 省略時はログイン中ユーザーのメールアドレスへ送信します。
-    SendTestEmailResponse:
-      type: object
-      required:
-        - message
-      properties:
-        message:
-          type: string
-        id:
-          type: string
-    Task:
+    Expense:
       type: object
       required:
         - id
-        - title
-        - status
+        - groupId
+        - description
+        - amount
+        - paidByMemberId
+        - splitType
+        - category
+        - splits
         - createdAt
         - updatedAt
       properties:
         id:
           type: string
-        title:
+        groupId:
           type: string
         description:
           type: string
-        status:
-          $ref: '#/components/schemas/TaskStatus'
-        dueDate:
+        amount:
           type: string
-          format: date-time
+        paidByMemberId:
+          type: string
+        splitType:
+          $ref: '#/components/schemas/SplitType'
+        category:
+          $ref: '#/components/schemas/ExpenseCategory'
+        splits:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExpenseSplit'
         createdAt:
           type: string
           format: date-time
         updatedAt:
           type: string
           format: date-time
-    TaskStatus:
+    ExpenseCategory:
       type: string
       enum:
-        - pending
-        - in_progress
-        - completed
-    UpdateTaskRequest:
+        - food
+        - transport
+        - accommodation
+        - entertainment
+        - shopping
+        - utilities
+        - other
+    ExpenseSplit:
       type: object
+      required:
+        - id
+        - expenseId
+        - memberId
+        - amount
+        - createdAt
       properties:
-        title:
+        id:
           type: string
-        description:
+        expenseId:
           type: string
-        status:
-          $ref: '#/components/schemas/TaskStatus'
-        dueDate:
+        memberId:
+          type: string
+        amount:
+          type: string
+        createdAt:
           type: string
           format: date-time
+    Group:
+      type: object
+      required:
+        - id
+        - name
+        - currency
+        - members
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        currency:
+          type: string
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Member:
+      type: object
+      required:
+        - id
+        - groupId
+        - name
+        - emoji
+        - createdAt
+      properties:
+        id:
+          type: string
+        groupId:
+          type: string
+        name:
+          type: string
+        emoji:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    SplitType:
+      type: string
+      enum:
+        - equal
+        - exact
+    UpdateExpenseRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        amount:
+          type: string
+        paidByMemberId:
+          type: string
+        splitType:
+          $ref: '#/components/schemas/SplitType'
+        category:
+          $ref: '#/components/schemas/ExpenseCategory'
+        splits:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateExpenseSplitInput'
+    UpdateMemberRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        emoji:
+          type: string
 servers:
   - url: http://localhost:3000
     description: Development server

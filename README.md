@@ -1,251 +1,73 @@
-# Monorepo
+# Splitty - Expense Splitting App
 
-A full-stack TypeScript monorepo built with Turborepo.
+A Splitwise-like expense splitting app. Anonymous (no login) — create groups via shareable links, add members by name + emoji, log expenses, and view balances.
 
 ## Tech Stack
 
-- **Build System**: [Turborepo](https://turbo.build/repo)
-- **Package Manager**: [pnpm](https://pnpm.io/)
-- **Runtime Manager**: [mise](https://mise.jdx.dev/)
-- **Language**: TypeScript
+- **Build System**: [Turborepo](https://turbo.build/repo) + [pnpm](https://pnpm.io/)
+- **Frontend**: React 18 + TanStack Router + TanStack Query + Vite + TailwindCSS
+- **Backend**: Hono 4 (Node.js dev / Cloudflare Workers prod)
+- **Database**: PostgreSQL + Drizzle ORM (Neon in prod)
+- **API Spec**: TypeSpec → OpenAPI → Orval code gen
+- **Mobile**: Ionic + Capacitor + React
+- **i18n**: English + Japanese
 
-### Apps
+## What's Done
 
-| App | Description | Tech |
-|-----|-------------|------|
-| `apps/web` | Web application | React, Tanstack Router, Tanstack Query, Vite |
-| `apps/hp` | Landing / marketing site (public HP) | React, Tanstack Router, Tanstack Query, Vite |
-| `apps/mobile` | Mobile application | Ionic, Capacitor, React |
-| `apps/api` | Backend API | Hono, Node.js |
+- [x] **Database schema**: groups, members, expenses, expense_splits (migrated to Neon)
+- [x] **API spec (TypeSpec)**: All endpoints defined and code generated
+- [x] **Core domain layer**: Entity classes (Group, Member, Expense, ExpenseSplit) with repository interfaces
+- [x] **Infrastructure layer**: Drizzle repository implementations
+- [x] **API handlers**: All 12 handlers (CRUD for groups/members/expenses + balance calculation)
+- [x] **i18n**: EN + JA translations for home, groups, expenses, balances
+- [x] **Cleanup**: Removed auth (Better Auth), task demo, landing page
 
-### Packages
+## What's Left (TODO)
 
-| Package | Description | Tech |
-|---------|-------------|------|
-| `packages/core` | Domain logic (no external dependencies) | Pure TypeScript |
-| `packages/infrastructure` | External service integrations | PostgreSQL, Drizzle ORM |
-| `packages/ui` | Shared UI components & Storybook | React, TailwindCSS, Storybook |
-| `packages/spec` | API specification & code generation | TypeSpec, Orval, OpenAPI, Zod |
-| `packages/cdk` | Infrastructure as Code | AWS CDK |
-| `packages/tailwind-config` | Shared Tailwind configuration | TailwindCSS, PostCSS |
+### Web Frontend (Phase 7)
+- [ ] Home page (`apps/web/src/routes/index/route.tsx`) — Create group form with name, currency, member inputs
+- [ ] Group page (`apps/web/src/routes/group/$groupId/route.tsx`) — Tabbed layout (Expenses | Balances | Members)
+- [ ] Expense list component — Cards with description, amount, payer, category badge
+- [ ] Expense form dialog — Add/edit with split type toggle, member selection, category picker
+- [ ] Balance summary — Per-member net balance + simplified "who owes whom"
+- [ ] Member management — Add/edit/delete members
+- [ ] Share link component — Copy-to-clipboard URL
+- [ ] Fun & colorful styling (gradients, rounded corners, emoji avatars)
+- [ ] Mobile-responsive design
 
-## Getting Started
+### Mobile App (Phase 8)
+- [ ] Home page (`apps/mobile/src/pages/Home.tsx`) — Create group form (Ionic)
+- [ ] Group page (`apps/mobile/src/pages/Group.tsx`) — Segment tabs
+- [ ] Add expense page (`apps/mobile/src/pages/AddExpense.tsx`)
 
-### Prerequisites
+### Polish
+- [ ] Loading states + empty states
+- [ ] Error handling (404 groups, validation feedback)
+- [ ] End-to-end testing
 
-- [mise](https://mise.jdx.dev/) - Runtime version manager
-
-### Installation
-
-```bash
-# Install Node.js and pnpm via mise
-mise install
-
-# Install dependencies
-mise run install
-
-# Generate API client & server code from TypeSpec
-mise run generate
-
-# Build all packages
-mise run build
-```
-
-### Development
+## Development
 
 ```bash
-# Run all apps in development mode
-mise run dev
-
-# Run specific app
-mise run dev:web
-mise run dev:hp
-mise run dev:mobile
-mise run dev:api
+mise install          # Install Node + pnpm
+pnpm install          # Install dependencies
+docker compose up -d  # Start local PostgreSQL (or use Neon)
+pnpm drizzle-kit migrate  # Run migrations
+pnpm run dev          # Start all dev servers
 ```
 
-#### `mise run dev` で開く localhost 一覧
+## API Endpoints
 
-`mise run dev` は `pnpm turbo run dev storybook` を実行し、各パッケージの開発サーバーが並列で起動します。デフォルトのポートは次のとおりです（環境変数で変えている場合はその値に従います）。
-
-| サービス | URL | 備考 |
-|----------|-----|------|
-| Web アプリ | http://localhost:5173 | `apps/web`（Vite） |
-| HP（ランディング） | http://localhost:5174 | `apps/hp`（Vite） |
-| API | http://localhost:3000 | `apps/api`（`PORT` で変更可） |
-| Mobile（Vite） | http://localhost:8100 | `apps/mobile` |
-| Swagger UI（OpenAPI） | http://localhost:4000/api-docs | `packages/spec`（`SWAGGER_PORT` でポート変更可。`/` は `/api-docs` にリダイレクト） |
-| Storybook | http://localhost:6006 | `packages/ui` |
-| Scalar API ドキュメント | http://localhost:8788 | `apps/api-docs`（`serve` で `public/` を配信） |
-| PostgreSQL | `localhost:5432` | DB 接続用（ブラウザ用 URL ではない） |
-
-`packages/ui` の `dev`（tsup の watch）はビルドウォッチのみで、ブラウザで開く URL はありません。コンポーネント確認は上記 Storybook を利用してください。
-
-### Local Database (PostgreSQL)
-
-ローカル開発では Docker Compose で PostgreSQL を使用します。**初回のみ** mise のローカル設定を用意してください。
-
-```bash
-# 初回のみ: .mise.local.toml を作成（パスワードと DATABASE_URL を設定）
-cp .mise.local.toml.example .mise.local.toml
-# .mise.local.toml を開き、POSTGRES_PASSWORD と DATABASE_URL をローカル用の値に書き換える
-```
-
-`mise run` でタスクを実行すると `.mise.local.toml` の環境変数が読み込まれるため、`docker:up` や `db:migrate` でその値が使われます。
-
-```bash
-# PostgreSQL を起動
-mise run docker:up
-
-# マイグレーションを実行
-mise run db:migrate
-
-# 停止
-mise run docker:down
-```
-
-- **PostgreSQL**: localhost:5432（接続文字列は `DATABASE_URL`）
-
-> Note: `mise run dev` を実行すると、自動的に Docker Compose で PostgreSQL が起動しマイグレーションが実行されます。その前に `.mise.local.toml` の設定が必要です。
-
-### API Generation Flow
-
-1. Edit API spec in `packages/spec/src/main.tsp`
-2. Run `mise run generate:spec`
-3. OpenAPI schema is generated in `packages/spec/generated/openapi.yaml`
-4. Orval generates:
-   - **Frontend**: Tanstack Query hooks in `packages/spec/generated/client/`
-   - **Backend**: Hono routes, Zod schemas in `packages/spec/generated/hono/`
-5. Import and use in your apps
-
-```typescript
-// Frontend: apps/web or apps/mobile
-import { useTasksList, useTasksCreate } from "@repo/spec/client/tasks/tasks";
-
-function TasksPage() {
-  const { data, isLoading } = useTasksList();
-  const createTask = useTasksCreate();
-  // ...
-}
-```
-
-`apps/hp`（公開 HP）は `@repo/ui` / `@repo/tailwind-config` を使う静的寄りの SPA で、API 生成クライアントは通常使いません。デプロイは [apps/hp/AGENTS.md](apps/hp/AGENTS.md)（Cloudflare Pages / Wrangler）を参照してください。
-
-```typescript
-// Backend: apps/api - using generated Zod schemas for validation
-import { zValidator } from "@hono/zod-validator";
-import {
-  tasksCreateBody,
-  tasksListQueryParams,
-} from "@repo/spec/hono/zod/tasks";
-
-app.post("/api/tasks", zValidator("json", tasksCreateBody), async (c) => {
-  const body = c.req.valid("json"); // Fully typed from OpenAPI spec
-  // ...
-});
-```
-
-## Project Structure
-
-```
-monorepo/
-├── apps/
-│   ├── web/              # React web app
-│   ├── hp/               # Landing / marketing (Vite SPA, Pages 用 wrangler.toml)
-│   ├── mobile/           # Ionic mobile app
-│   ├── api/              # Hono API server
-│   └── api-docs/         # Scalar API docs (static)
-├── packages/
-│   ├── core/             # Domain logic
-│   ├── infrastructure/   # External integrations (PostgreSQL, Drizzle ORM)
-│   ├── ui/               # Shared UI components + Storybook
-│   ├── spec/             # API spec & generated code (client + server)
-│   ├── cdk/              # AWS CDK infrastructure
-│   └── tailwind-config/  # Shared Tailwind config
-├── docker-compose.yml    # PostgreSQL (local)
-├── turbo.json            # Turborepo config
-├── pnpm-workspace.yaml   # pnpm workspace config
-└── tsconfig.json         # Base TypeScript config
-```
-
-## Tasks
-
-すべてのタスクは `mise tasks` で確認できます。
-
-| Task | Description |
-|------|-------------|
-| `mise run build` | Build all packages and apps |
-| `mise run build:hp` | Build HP app only (`apps/hp`) |
-| `mise run dev` | Start development servers |
-| `mise run dev:hp` | Start HP app only (`apps/hp`, Vite on :5174) |
-| `mise run deploy-hp` | Build `apps/hp` and deploy to Cloudflare Pages (`wrangler pages deploy`) |
-| `mise run generate` | Generate API client & server code from TypeSpec |
-| `mise run typecheck` | Run TypeScript type checking |
-| `mise run lint` | Run linting (Biome) |
-| `mise run format` | Format code (Biome) |
-| `mise run check` | Run lint + format check |
-| `mise run clean` | Clean build outputs |
-| `mise run storybook` | Start Storybook |
-| `mise run docker:up` | Start Docker Compose services |
-| `mise run docker:down` | Stop Docker Compose services |
-| `mise run db:migrate` | Run PostgreSQL migrations |
-| `mise run db:generate` | Generate Drizzle migration files |
-| `mise run db:studio` | Open Drizzle Studio |
-
-## Environment Variables
-
-- **`.mise.toml`**: 共通の環境変数（`NODE_ENV`, `BETTER_AUTH_URL` など）。リポジトリにコミットされます。
-- **`.mise.local.toml`**: ローカル専用の環境変数（`DATABASE_URL`, `POSTGRES_PASSWORD` など）。`.gitignore` されているためコミットされません。初回は `.mise.local.toml.example` をコピーして作成します。
-
-| Variable | Description |
-|----------|-------------|
-| `NODE_ENV` | 環境（.mise.toml） |
-| `BETTER_AUTH_URL` | API のベース URL（.mise.toml） |
-| `DATABASE_URL` | PostgreSQL 接続文字列（.mise.local.toml） |
-| `POSTGRES_PASSWORD` | Docker Compose 用 PostgreSQL パスワード（.mise.local.toml） |
-
-## Mobile Development
-
-### iOS
-
-```bash
-mise run build:mobile
-mise run cap:sync
-mise run cap:ios
-```
-
-### Android
-
-```bash
-mise run build:mobile
-mise run cap:sync
-mise run cap:android
-```
-
-## Storybook
-
-UI コンポーネントのドキュメントは `packages/ui` 内の Storybook で管理しています。
-
-```bash
-# Storybook を起動
-mise run storybook
-```
-
-http://localhost:6006 でアクセスできます。
-
-## Git Hooks
-
-Husky と lint-staged を使用してコミット時に自動でコードチェックを行います。
-
-- **pre-commit**: Biome による lint + format チェック
-
-```bash
-# 手動で lint-staged を実行
-mise run lint-staged
-```
-
-## License
-
-MIT
-
-
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/groups` | Create group with initial members |
+| GET | `/api/groups/{groupId}` | Get group with members |
+| POST | `/api/groups/{groupId}/members` | Add member |
+| PUT | `/api/groups/{groupId}/members/{memberId}` | Update member |
+| DELETE | `/api/groups/{groupId}/members/{memberId}` | Remove member |
+| GET | `/api/groups/{groupId}/expenses` | List expenses (paginated) |
+| POST | `/api/groups/{groupId}/expenses` | Create expense + splits |
+| GET | `/api/groups/{groupId}/expenses/{expenseId}` | Get expense |
+| PUT | `/api/groups/{groupId}/expenses/{expenseId}` | Update expense |
+| DELETE | `/api/groups/{groupId}/expenses/{expenseId}` | Delete expense |
+| GET | `/api/groups/{groupId}/balances` | Get balance summary |
+| GET | `/api/health` | Health check |

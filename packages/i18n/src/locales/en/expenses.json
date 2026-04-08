@@ -1,0 +1,22 @@
+{
+  "addExpense": "Add Expense",
+  "editExpense": "Edit Expense",
+  "description": "Description",
+  "descriptionPlaceholder": "Dinner, Taxi, Hotel, etc.",
+  "amount": "Amount",
+  "paidBy": "Paid by",
+  "splitType": "Split type",
+  "equalSplit": "Equal",
+  "exactSplit": "Exact amounts",
+  "splitAmong": "Split among",
+  "category": "Category",
+  "food": "Food",
+  "transport": "Transport",
+  "accommodation": "Accommodation",
+  "entertainment": "Entertainment",
+  "shopping": "Shopping",
+  "utilities": "Utilities",
+  "other": "Other",
+  "deleteConfirm": "Delete this expense?",
+  "splitMismatch": "Split amounts must equal the total"
+}

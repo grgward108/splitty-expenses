@@ -1,9 +1,8 @@
-import { getAuth, getDb } from "@repo/infrastructure";
+import { getDb } from "@repo/infrastructure";
 import { Hono, type MiddlewareHandler } from "hono";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 
-import { trustedOriginsForRequest } from "./lib/trusted-origins";
 import { appCorsMiddleware } from "./middleware/app-cors";
 import type { AppEnv } from "./types/app-env";
 
@@ -16,9 +15,8 @@ app.use("*", logger());
 app.use("*", prettyJSON());
 app.use("*", appCorsMiddleware);
 
-// db・auth 遅延初期化ミドルウェア（/api/auth・/api/tasks のみ DB が必要）
-// Node.js では process.env、Workers では c.env (Hyperdrive バインディング) から接続文字列を取得
-const dbAuthMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
+// DB middleware for API routes
+const dbMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
   const connectionString =
     c.env.HYPERDRIVE?.connectionString ?? c.env.DATABASE_URL ?? process.env.DATABASE_URL;
 
@@ -27,52 +25,20 @@ const dbAuthMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
   }
 
   const db = getDb(connectionString);
-  const authBaseUrl =
-    c.env.BETTER_AUTH_URL ?? process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
-  const auth = getAuth({
-    db,
-    googleClientId: c.env.GOOGLE_CLIENT_ID ?? process.env.GOOGLE_CLIENT_ID ?? "",
-    googleClientSecret: c.env.GOOGLE_CLIENT_SECRET ?? process.env.GOOGLE_CLIENT_SECRET ?? "",
-    trustedOrigins: trustedOriginsForRequest(c),
-    // Workers では BETTER_AUTH_* が process.env に載らないことがあり、OAuth state 検証が壊れる（please_restart_the_process）
-    secret: c.env.BETTER_AUTH_SECRET ?? process.env.BETTER_AUTH_SECRET,
-    baseURL: authBaseUrl,
-  });
-
   c.set("db", db);
-  c.set("auth", auth);
   await next();
 };
 
-app.use("/api/auth/*", dbAuthMiddleware);
-app.use("/api/tasks/*", dbAuthMiddleware);
-app.use("/api/email/*", dbAuthMiddleware);
+app.use("/api/groups/*", dbMiddleware);
+app.use("/api/health/*", dbMiddleware);
 
-// セッションミドルウェア（タスク API のみ c.get("user") / c.get("session") をセット）
-const sessionMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
-  const auth = c.get("auth");
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  c.set("user", session?.user ?? null);
-  c.set("session", session?.session ?? null);
-  await next();
-};
-
-app.use("/api/tasks/*", sessionMiddleware);
-app.use("/api/email/*", sessionMiddleware);
-
-// 生成ルートを Better Auth の /api/auth/* より先にマウント（/api/auth/mobile/* を確実に一致させる）
+// Generated routes
 app.route("/", generatedRoutes);
-
-// Better Auth ハンドラー（/api/auth/* へのその他すべてのリクエストを処理）
-app.on(["POST", "GET"], "/api/auth/*", (c) => {
-  const auth = c.get("auth");
-  return auth.handler(c.req.raw);
-});
 
 // Root endpoint
 app.get("/", (c) => {
   return c.json({
-    name: "Monorepo API",
+    name: "Splitty API",
     version: "0.0.0",
     docs: "/api/health",
   });

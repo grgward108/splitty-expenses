@@ -1,6 +1,0 @@
-# Cloudflare Pages（静的サイト + 将来の Pages Functions 用）
-# API（apps/api）の wrangler.toml とは別物: Workers の main や Hyperdrive はここでは使わない。
-# 参照: https://developers.cloudflare.com/pages/functions/wrangler-configuration/
-name = "hp"
-compatibility_date = "2024-12-30"
-pages_build_output_dir = "dist"

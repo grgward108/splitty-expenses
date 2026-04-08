@@ -9,7 +9,7 @@ import { routeTree } from "./routeTree.gen";
 import "./styles/globals.css";
 
 // Configure API base URL from environment variable
-setBaseUrl(import.meta.env.BETTER_AUTH_URL ?? "");
+setBaseUrl(import.meta.env.VITE_API_URL ?? "");
 
 // Create a new router instance
 const router = createRouter({ routeTree });

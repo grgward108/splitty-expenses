@@ -1,0 +1,14 @@
+{
+  "expenses": "Expenses",
+  "balances": "Balances",
+  "members": "Members",
+  "addExpense": "Add Expense",
+  "noExpenses": "No expenses yet",
+  "noExpensesHint": "Add your first expense to get started",
+  "totalExpenses": "Total: {{amount}}",
+  "shareGroup": "Share Group",
+  "shareLinkCopied": "Link copied!",
+  "groupNotFound": "Group not found",
+  "paidBy": "paid by",
+  "splitAmong": "split among {{count}} people"
+}

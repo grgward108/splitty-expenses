@@ -1,5 +1,8 @@
 // Base entity
 export * from "./base-entity";
 
-// Task entity
-export * from "./task";
+// Domain entities
+export * from "./group";
+export * from "./member";
+export * from "./expense";
+export * from "./expense-split";
