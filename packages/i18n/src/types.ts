@@ -1,20 +1,20 @@
 import "i18next";
 
-import type auth from "./locales/ja/auth.json";
+import type balances from "./locales/ja/balances.json";
 import type common from "./locales/ja/common.json";
-import type landing from "./locales/ja/landing.json";
-import type settings from "./locales/ja/settings.json";
-import type tasks from "./locales/ja/tasks.json";
+import type expenses from "./locales/ja/expenses.json";
+import type groups from "./locales/ja/groups.json";
+import type home from "./locales/ja/home.json";
 
 declare module "i18next" {
   interface CustomTypeOptions {
     defaultNS: "common";
     resources: {
       common: typeof common;
-      auth: typeof auth;
-      tasks: typeof tasks;
-      settings: typeof settings;
-      landing: typeof landing;
+      home: typeof home;
+      groups: typeof groups;
+      expenses: typeof expenses;
+      balances: typeof balances;
     };
   }
 }

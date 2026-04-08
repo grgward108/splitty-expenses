@@ -9,109 +9,66 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as LoginRouteRouteImport } from './routes/login/route'
-import { Route as AuthRouteRouteImport } from './routes/_auth/route'
-import { Route as AuthSettingsRouteRouteImport } from './routes/_auth/settings/route'
-import { Route as AuthIndexRouteRouteImport } from './routes/_auth/index/route'
+import { Route as IndexRouteRouteImport } from './routes/index/route'
+import { Route as GroupGroupIdRouteRouteImport } from './routes/group/$groupId/route'
 
-const LoginRouteRoute = LoginRouteRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRouteRoute = AuthRouteRouteImport.update({
-  id: '/_auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSettingsRouteRoute = AuthSettingsRouteRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
-const AuthIndexRouteRoute = AuthIndexRouteRouteImport.update({
+const IndexRouteRoute = IndexRouteRouteImport.update({
   id: '/',
   path: '',
-  getParentRoute: () => AuthRouteRoute,
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroupGroupIdRouteRoute = GroupGroupIdRouteRouteImport.update({
+  id: '/group/$groupId',
+  path: '/group/$groupId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/login': typeof LoginRouteRoute
-  '/settings': typeof AuthSettingsRouteRoute
+  '/group/$groupId': typeof GroupGroupIdRouteRoute
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRouteRoute
-  '/settings': typeof AuthSettingsRouteRoute
+  '/group/$groupId': typeof GroupGroupIdRouteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_auth': typeof AuthRouteRouteWithChildren
-  '/login': typeof LoginRouteRoute
-  '/_auth/': typeof AuthIndexRouteRoute
-  '/_auth/settings': typeof AuthSettingsRouteRoute
+  '/': typeof IndexRouteRoute
+  '/group/$groupId': typeof GroupGroupIdRouteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/login' | '/settings'
+  fullPaths: '/group/$groupId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/settings'
-  id: '__root__' | '/_auth' | '/login' | '/_auth/' | '/_auth/settings'
+  to: '/group/$groupId'
+  id: '__root__' | '/' | '/group/$groupId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AuthRouteRoute: typeof AuthRouteRouteWithChildren
-  LoginRouteRoute: typeof LoginRouteRoute
+  IndexRouteRoute: typeof IndexRouteRoute
+  GroupGroupIdRouteRoute: typeof GroupGroupIdRouteRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_auth': {
-      id: '/_auth'
+    '/': {
+      id: '/'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof AuthRouteRouteImport
+      preLoaderRoute: typeof IndexRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth/settings': {
-      id: '/_auth/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthSettingsRouteRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/_auth/': {
-      id: '/_auth/'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof AuthIndexRouteRouteImport
-      parentRoute: typeof AuthRouteRoute
+    '/group/$groupId': {
+      id: '/group/$groupId'
+      path: '/group/$groupId'
+      fullPath: '/group/$groupId'
+      preLoaderRoute: typeof GroupGroupIdRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface AuthRouteRouteChildren {
-  AuthIndexRouteRoute: typeof AuthIndexRouteRoute
-  AuthSettingsRouteRoute: typeof AuthSettingsRouteRoute
-}
-
-const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-  AuthIndexRouteRoute: AuthIndexRouteRoute,
-  AuthSettingsRouteRoute: AuthSettingsRouteRoute,
-}
-
-const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
-  AuthRouteRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
-  AuthRouteRoute: AuthRouteRouteWithChildren,
-  LoginRouteRoute: LoginRouteRoute,
+  IndexRouteRoute: IndexRouteRoute,
+  GroupGroupIdRouteRoute: GroupGroupIdRouteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
