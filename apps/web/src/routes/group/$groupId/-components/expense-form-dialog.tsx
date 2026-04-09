@@ -10,34 +10,26 @@ import type {
   Group,
   ExpenseCategory,
   CreateExpenseSplitInput,
+  Member,
 } from "@repo/spec/client/model";
-// SplitType values used inline as "equal" | "exact"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  Button,
-  Input,
-  Label,
-  Checkbox,
 } from "@repo/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useMemo } from "react";
 
-const CATEGORY_OPTIONS: {
-  value: ExpenseCategory;
-  emoji: string;
-  labelKey: string;
-}[] = [
-  { value: "food", emoji: "\ud83c\udf54", labelKey: "food" },
-  { value: "transport", emoji: "\ud83d\ude97", labelKey: "transport" },
-  { value: "accommodation", emoji: "\ud83c\udfe8", labelKey: "accommodation" },
-  { value: "entertainment", emoji: "\ud83c\udfae", labelKey: "entertainment" },
-  { value: "shopping", emoji: "\ud83d\udecd\ufe0f", labelKey: "shopping" },
-  { value: "utilities", emoji: "\ud83d\udca1", labelKey: "utilities" },
-  { value: "other", emoji: "\ud83d\udce6", labelKey: "other" },
+const CATEGORIES: { value: ExpenseCategory; emoji: string; labelKey: string; bg: string }[] = [
+  { value: "food", emoji: "\ud83c\udf54", labelKey: "food", bg: "#fff3e0" },
+  { value: "transport", emoji: "\ud83d\ude97", labelKey: "transport", bg: "#e3f2fd" },
+  { value: "accommodation", emoji: "\ud83c\udfe8", labelKey: "accommodation", bg: "#f3e5f5" },
+  { value: "entertainment", emoji: "\ud83c\udfae", labelKey: "entertainment", bg: "#e8f5e9" },
+  { value: "shopping", emoji: "\ud83d\udecd\ufe0f", labelKey: "shopping", bg: "#fce4ec" },
+  { value: "utilities", emoji: "\ud83d\udca1", labelKey: "utilities", bg: "#fff8e1" },
+  { value: "other", emoji: "\ud83d\udce6", labelKey: "other", bg: "#f5f5f5" },
 ];
 
 interface ExpenseFormDialogProps {
@@ -71,16 +63,12 @@ export function ExpenseFormDialog({
   const [paidByMemberId, setPaidByMemberId] = useState("");
   const [splitType, setSplitType] = useState<"equal" | "exact">("equal");
   const [category, setCategory] = useState<ExpenseCategory>("other");
-  const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(
-    new Set()
-  );
+  const [selectedMemberIds, setSelectedMemberIds] = useState<Set<string>>(new Set());
   const [exactAmounts, setExactAmounts] = useState<Record<string, string>>({});
   const [validationError, setValidationError] = useState("");
 
-  // Initialize form
   useEffect(() => {
     if (!open) return;
-
     if (isEditing && expenseQuery.data) {
       const expense = expenseQuery.data.data;
       if ("id" in expense) {
@@ -89,9 +77,7 @@ export function ExpenseFormDialog({
         setPaidByMemberId(expense.paidByMemberId);
         setSplitType(expense.splitType);
         setCategory(expense.category);
-        setSelectedMemberIds(
-          new Set(expense.splits.map((s) => s.memberId))
-        );
+        setSelectedMemberIds(new Set(expense.splits.map((s: { memberId: string }) => s.memberId)));
         const amounts: Record<string, string> = {};
         for (const split of expense.splits) {
           amounts[split.memberId] = split.amount;
@@ -104,15 +90,13 @@ export function ExpenseFormDialog({
       setPaidByMemberId(group.members[0]?.id ?? "");
       setSplitType("equal");
       setCategory("other");
-      setSelectedMemberIds(new Set(group.members.map((m) => m.id)));
+      setSelectedMemberIds(new Set(group.members.map((m: Member) => m.id)));
       setExactAmounts({});
     }
     setValidationError("");
   }, [open, isEditing, expenseQuery.data, group.members]);
 
-  const selectedMembers = group.members.filter((m) =>
-    selectedMemberIds.has(m.id)
-  );
+  const selectedMembers = group.members.filter((m: Member) => selectedMemberIds.has(m.id));
 
   const equalAmount = useMemo(() => {
     if (selectedMembers.length === 0 || !amount) return "0.00";
@@ -124,26 +108,17 @@ export function ExpenseFormDialog({
   const toggleMember = (memberId: string) => {
     setSelectedMemberIds((prev) => {
       const next = new Set(prev);
-      if (next.has(memberId)) {
-        next.delete(memberId);
-      } else {
-        next.add(memberId);
-      }
+      if (next.has(memberId)) next.delete(memberId);
+      else next.add(memberId);
       return next;
     });
   };
 
   const buildSplits = (): CreateExpenseSplitInput[] => {
     if (splitType === "equal") {
-      return selectedMembers.map((m) => ({
-        memberId: m.id,
-        amount: equalAmount,
-      }));
+      return selectedMembers.map((m: Member) => ({ memberId: m.id, amount: equalAmount }));
     }
-    return selectedMembers.map((m) => ({
-      memberId: m.id,
-      amount: exactAmounts[m.id] ?? "0",
-    }));
+    return selectedMembers.map((m: Member) => ({ memberId: m.id, amount: exactAmounts[m.id] ?? "0" }));
   };
 
   const validateSplits = (): boolean => {
@@ -151,8 +126,7 @@ export function ExpenseFormDialog({
     if (splitType === "exact") {
       const total = Number.parseFloat(amount);
       const splitTotal = selectedMembers.reduce(
-        (sum, m) => sum + Number.parseFloat(exactAmounts[m.id] ?? "0"),
-        0
+        (sum: number, m: Member) => sum + Number.parseFloat(exactAmounts[m.id] ?? "0"), 0
       );
       if (Math.abs(total - splitTotal) > 0.01) {
         setValidationError(t("splitMismatch"));
@@ -178,171 +152,193 @@ export function ExpenseFormDialog({
     };
 
     const onSuccess = () => {
-      queryClient.invalidateQueries({
-        queryKey: getExpensesListQueryKey(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: getBalancesGetQueryKey(groupId),
-      });
+      queryClient.invalidateQueries({ queryKey: getExpensesListQueryKey(groupId) });
+      queryClient.invalidateQueries({ queryKey: getBalancesGetQueryKey(groupId) });
       onOpenChange(false);
     };
 
     if (isEditing && expenseId) {
-      updateExpense.mutate(
-        { groupId, expenseId, data },
-        { onSuccess }
-      );
+      updateExpense.mutate({ groupId, expenseId, data }, { onSuccess });
     } else {
       createExpense.mutate({ groupId, data }, { onSuccess });
     }
   };
 
   const isPending = createExpense.isPending || updateExpense.isPending;
-  const canSubmit =
-    description.trim() && amount && paidByMemberId && selectedMembers.length > 0;
+  const canSubmit = description.trim() && amount && paidByMemberId && selectedMembers.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto rounded-2xl" style={{ background: "var(--color-warm-white)" }}>
         <DialogHeader>
-          <DialogTitle className="text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <DialogTitle className="font-display text-2xl italic" style={{ color: "var(--color-charcoal)" }}>
             {isEditing ? t("editExpense") : t("addExpense")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
           {/* Description */}
-          <div className="space-y-2">
-            <Label>{t("description")}</Label>
-            <Input
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--color-charcoal)" }}>
+              {t("description")}
+            </label>
+            <input
+              className="input-field"
               placeholder={t("descriptionPlaceholder")}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDescription(e.target.value)}
             />
           </div>
 
           {/* Amount */}
-          <div className="space-y-2">
-            <Label>{t("amount")}</Label>
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--color-charcoal)" }}>
+              {t("amount")}
+            </label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-medium" style={{ color: "var(--color-muted)" }}>
                 {group.currency}
               </span>
-              <Input
+              <input
                 type="number"
                 step="0.01"
                 min="0"
                 placeholder="0.00"
+                className="input-field pl-14"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="pl-14"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount(e.target.value)}
               />
             </div>
           </div>
 
           {/* Paid By */}
-          <div className="space-y-2">
-            <Label>{t("paidBy")}</Label>
-            <select
-              value={paidByMemberId}
-              onChange={(e) => setPaidByMemberId(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
-            >
-              {group.members.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.emoji} {m.name}
-                </option>
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--color-charcoal)" }}>
+              {t("paidBy")}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {group.members.map((m: Member) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => setPaidByMemberId(m.id)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    background: paidByMemberId === m.id ? "var(--color-charcoal)" : "transparent",
+                    color: paidByMemberId === m.id ? "white" : "var(--color-charcoal)",
+                    border: `1.5px solid ${paidByMemberId === m.id ? "var(--color-charcoal)" : "var(--color-border)"}`,
+                  }}
+                >
+                  <span className="text-base">{m.emoji}</span> {m.name}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* Category */}
-          <div className="space-y-2">
-            <Label>{t("category")}</Label>
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--color-charcoal)" }}>
+              {t("category")}
+            </label>
             <div className="grid grid-cols-4 gap-2">
-              {CATEGORY_OPTIONS.map((cat) => (
+              {CATEGORIES.map((cat) => (
                 <button
                   key={cat.value}
                   type="button"
                   onClick={() => setCategory(cat.value)}
-                  className={`flex flex-col items-center gap-1 p-2 rounded-xl border text-xs transition-all ${
-                    category === cat.value
-                      ? "border-purple-400 bg-purple-50 text-purple-700 shadow-sm"
-                      : "border-gray-200 bg-white text-gray-600 hover:border-purple-200 hover:bg-purple-50/50"
-                  }`}
+                  className="flex flex-col items-center gap-1 p-2.5 rounded-xl text-xs font-medium transition-all"
+                  style={{
+                    background: category === cat.value ? cat.bg : "transparent",
+                    border: `1.5px solid ${category === cat.value ? "rgba(0,0,0,0.1)" : "var(--color-border)"}`,
+                    color: "var(--color-charcoal)",
+                    transform: category === cat.value ? "scale(1.02)" : "scale(1)",
+                  }}
                 >
                   <span className="text-lg">{cat.emoji}</span>
-                  <span className="truncate w-full text-center">
-                    {t(cat.labelKey)}
-                  </span>
+                  <span className="truncate w-full text-center">{t(cat.labelKey)}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Split Type */}
-          <div className="space-y-2">
-            <Label>{t("splitType")}</Label>
-            <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--color-charcoal)" }}>
+              {t("splitType")}
+            </label>
+            <div className="flex p-1 rounded-xl" style={{ background: "rgba(0,0,0,0.04)" }}>
               <button
                 type="button"
                 onClick={() => setSplitType("equal")}
-                className={`px-4 py-2 rounded-xl border font-medium text-sm transition-all ${
-                  splitType === "equal"
-                    ? "border-purple-400 bg-purple-50 text-purple-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-purple-200"
-                }`}
+                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${splitType === "equal" ? "tab-active" : ""}`}
+                style={splitType !== "equal" ? { color: "var(--color-muted)" } : {}}
               >
-                \u00f7 {t("equalSplit")}
+                {t("equalSplit")}
               </button>
               <button
                 type="button"
                 onClick={() => setSplitType("exact")}
-                className={`px-4 py-2 rounded-xl border font-medium text-sm transition-all ${
-                  splitType === "exact"
-                    ? "border-purple-400 bg-purple-50 text-purple-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-purple-200"
-                }`}
+                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${splitType === "exact" ? "tab-active" : ""}`}
+                style={splitType !== "exact" ? { color: "var(--color-muted)" } : {}}
               >
-                \ud83d\udcdd {t("exactSplit")}
+                {t("exactSplit")}
               </button>
             </div>
           </div>
 
           {/* Split Among */}
-          <div className="space-y-2">
-            <Label>{t("splitAmong")}</Label>
-            <div className="space-y-2 rounded-xl border border-gray-200 p-3">
-              {group.members.map((member) => {
+          <div>
+            <label className="block text-sm font-semibold mb-1.5" style={{ color: "var(--color-charcoal)" }}>
+              {t("splitAmong")}
+            </label>
+            <div className="rounded-xl overflow-hidden" style={{ border: "1.5px solid var(--color-border)" }}>
+              {group.members.map((member: Member, i: number) => {
                 const isSelected = selectedMemberIds.has(member.id);
                 return (
-                  <div key={member.id} className="flex items-center gap-3">
-                    <Checkbox
-                      checked={isSelected}
-                      onChange={() => toggleMember(member.id)}
-                    />
-                    <span className="text-base">
-                      {member.emoji} {member.name}
+                  <div
+                    key={member.id}
+                    className="flex items-center gap-3 px-3 py-2.5 transition-colors"
+                    style={{
+                      borderBottom: i < group.members.length - 1 ? "1px solid var(--color-border)" : "none",
+                      background: isSelected ? "rgba(0,0,0,0.02)" : "transparent",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleMember(member.id)}
+                      className="w-5 h-5 rounded-md flex items-center justify-center transition-all shrink-0"
+                      style={{
+                        background: isSelected ? "var(--color-charcoal)" : "transparent",
+                        border: `2px solid ${isSelected ? "var(--color-charcoal)" : "var(--color-border)"}`,
+                      }}
+                    >
+                      {isSelected && (
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
+                    </button>
+                    <span className="text-base">{member.emoji}</span>
+                    <span className="font-medium text-sm flex-1" style={{ color: isSelected ? "var(--color-charcoal)" : "var(--color-muted)" }}>
+                      {member.name}
                     </span>
                     {isSelected && splitType === "equal" && amount && (
-                      <span className="ml-auto text-sm text-gray-400">
+                      <span className="text-sm tabular-nums" style={{ color: "var(--color-muted)" }}>
                         {group.currency} {equalAmount}
                       </span>
                     )}
                     {isSelected && splitType === "exact" && (
-                      <Input
+                      <input
                         type="number"
                         step="0.01"
                         min="0"
                         placeholder="0.00"
+                        className="input-field w-24 text-right text-sm"
+                        style={{ height: "32px", padding: "0 8px" }}
                         value={exactAmounts[member.id] ?? ""}
-                        onChange={(e) =>
-                          setExactAmounts((prev) => ({
-                            ...prev,
-                            [member.id]: e.target.value,
-                          }))
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setExactAmounts((prev) => ({ ...prev, [member.id]: e.target.value }))
                         }
-                        className="ml-auto w-28"
                       />
                     )}
                   </div>
@@ -350,22 +346,22 @@ export function ExpenseFormDialog({
               })}
             </div>
             {validationError && (
-              <p className="text-sm text-red-500">{validationError}</p>
+              <p className="text-sm mt-1.5" style={{ color: "var(--color-coral)" }}>{validationError}</p>
             )}
           </div>
         </div>
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="gap-2 pt-2">
+          <button onClick={() => onOpenChange(false)} className="btn-secondary">
             {tc("cancel")}
-          </Button>
-          <Button
+          </button>
+          <button
             onClick={handleSubmit}
             disabled={!canSubmit || isPending}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+            className="btn-primary"
           >
             {isPending ? tc("saving") : tc("save")}
-          </Button>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

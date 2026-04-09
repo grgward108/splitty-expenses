@@ -1,5 +1,4 @@
 import { useTranslation } from "@repo/i18n";
-import { Button, Card, CardContent, Input } from "@repo/ui";
 import { useState } from "react";
 
 interface ShareLinkProps {
@@ -16,43 +15,39 @@ export function ShareLink({ groupId }: ShareLinkProps) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback for older browsers
       const textArea = document.createElement("textarea");
       textArea.value = url;
       document.body.appendChild(textArea);
       textArea.select();
       document.execCommand("copy");
       document.body.removeChild(textArea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
-      <CardContent className="p-3">
-        <div className="flex items-center gap-2">
-          <Input
-            value={url}
-            readOnly
-            className="flex-1 bg-gray-50 text-sm text-gray-600"
-            onClick={(e) => (e.target as HTMLInputElement).select()}
-          />
-          <Button
-            onClick={handleCopy}
-            className={`whitespace-nowrap transition-all ${
-              copied
-                ? "bg-emerald-500 hover:bg-emerald-600 text-white"
-                : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
-            }`}
-          >
-            {copied ? `\u2705 ${t("shareLinkCopied")}` : `\ud83d\udccb ${tc("share")}`}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="card-surface p-3">
+      <div className="flex items-center gap-2">
+        <input
+          value={url}
+          readOnly
+          className="input-field flex-1 text-sm"
+          style={{ background: "var(--color-cream)", color: "var(--color-slate)", height: "40px" }}
+          onClick={(e: React.MouseEvent<HTMLInputElement>) => (e.target as HTMLInputElement).select()}
+        />
+        <button
+          onClick={handleCopy}
+          className="text-sm font-semibold px-4 py-2 rounded-lg whitespace-nowrap transition-all"
+          style={{
+            background: copied ? "var(--color-sage)" : "var(--color-charcoal)",
+            color: "white",
+          }}
+        >
+          {copied ? t("shareLinkCopied") : tc("share")}
+        </button>
+      </div>
+    </div>
   );
 }

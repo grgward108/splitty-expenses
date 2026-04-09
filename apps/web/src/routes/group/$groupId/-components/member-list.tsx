@@ -7,11 +7,10 @@ import {
 import { getGroupsGetQueryKey } from "@repo/spec/client/groups/groups";
 import { getBalancesGetQueryKey } from "@repo/spec/client/balances/balances";
 import type { Group, Member } from "@repo/spec/client/model";
-import { Button, Card, CardContent, Input } from "@repo/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-const COMMON_EMOJIS = [
+const EMOJIS = [
   "\ud83d\ude00", "\ud83d\ude0e", "\ud83e\udd29", "\ud83e\udd73", "\ud83d\ude0d",
   "\ud83e\udd17", "\ud83d\ude1c", "\ud83e\udd2f", "\ud83d\udc7b", "\ud83d\udc36",
   "\ud83d\udc31", "\ud83e\udd81", "\ud83d\udc3b", "\ud83d\udc28", "\ud83e\udd8a",
@@ -40,28 +39,15 @@ export function MemberList({ groupId, group }: MemberListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const invalidate = () => {
-    queryClient.invalidateQueries({
-      queryKey: getGroupsGetQueryKey(groupId),
-    });
-    queryClient.invalidateQueries({
-      queryKey: getBalancesGetQueryKey(groupId),
-    });
+    queryClient.invalidateQueries({ queryKey: getGroupsGetQueryKey(groupId) });
+    queryClient.invalidateQueries({ queryKey: getBalancesGetQueryKey(groupId) });
   };
 
   const handleAdd = () => {
     if (!newName.trim()) return;
     addMember.mutate(
-      {
-        groupId,
-        data: { name: newName.trim(), emoji: newEmoji },
-      },
-      {
-        onSuccess: () => {
-          setNewName("");
-          setNewEmoji("\ud83d\ude00");
-          invalidate();
-        },
-      }
+      { groupId, data: { name: newName.trim(), emoji: newEmoji } },
+      { onSuccess: () => { setNewName(""); setNewEmoji("\ud83d\ude00"); invalidate(); } }
     );
   };
 
@@ -74,17 +60,8 @@ export function MemberList({ groupId, group }: MemberListProps) {
   const handleUpdate = () => {
     if (!editingId || !editName.trim()) return;
     updateMember.mutate(
-      {
-        groupId,
-        memberId: editingId,
-        data: { name: editName.trim(), emoji: editEmoji },
-      },
-      {
-        onSuccess: () => {
-          setEditingId(null);
-          invalidate();
-        },
-      }
+      { groupId, memberId: editingId, data: { name: editName.trim(), emoji: editEmoji } },
+      { onSuccess: () => { setEditingId(null); invalidate(); } }
     );
   };
 
@@ -92,180 +69,150 @@ export function MemberList({ groupId, group }: MemberListProps) {
     if (deletingId === memberId) {
       removeMember.mutate(
         { groupId, memberId },
-        {
-          onSuccess: () => {
-            setDeletingId(null);
-            invalidate();
-          },
-        }
+        { onSuccess: () => { setDeletingId(null); invalidate(); } }
       );
     } else {
       setDeletingId(memberId);
     }
   };
 
+  const EmojiPicker = ({ pickerId, onSelect }: { pickerId: string; onSelect: (emoji: string) => void }) => {
+    if (emojiPickerFor !== pickerId) return null;
+    return (
+      <div
+        className="absolute left-0 top-13 z-50 grid grid-cols-5 gap-1 p-2.5 rounded-xl shadow-xl"
+        style={{ background: "var(--color-warm-white)", border: "1px solid var(--color-border)" }}
+      >
+        {EMOJIS.map((emoji) => (
+          <button
+            key={emoji}
+            type="button"
+            onClick={() => { onSelect(emoji); setEmojiPickerFor(null); }}
+            className="w-9 h-9 rounded-lg text-lg flex items-center justify-center hover:bg-black/5 transition-colors"
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* Member cards */}
-      <div className="space-y-2">
-        {group.members.map((member) => {
+      <div className="card-surface overflow-hidden">
+        {group.members.map((member: Member, i: number) => {
           const isEditing = editingId === member.id;
 
           if (isEditing) {
             return (
-              <Card
+              <div
                 key={member.id}
-                className="border-2 border-purple-300 shadow-sm bg-white/90"
+                className="p-4"
+                style={{
+                  borderBottom: i < group.members.length - 1 ? "1px solid var(--color-border)" : "none",
+                  background: "rgba(0,0,0,0.02)",
+                }}
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setEmojiPickerFor(
-                            emojiPickerFor === member.id ? null : member.id
-                          )
-                        }
-                        className="flex h-10 w-10 items-center justify-center rounded-lg border border-input bg-white text-xl hover:bg-gray-50"
-                      >
-                        {editEmoji}
-                      </button>
-                      {emojiPickerFor === member.id && (
-                        <div className="absolute left-0 top-12 z-50 grid grid-cols-5 gap-1 rounded-xl border bg-white p-2 shadow-lg">
-                          {COMMON_EMOJIS.map((emoji) => (
-                            <button
-                              key={emoji}
-                              type="button"
-                              onClick={() => {
-                                setEditEmoji(emoji);
-                                setEmojiPickerFor(null);
-                              }}
-                              className="flex h-8 w-8 items-center justify-center rounded-lg text-lg hover:bg-purple-100"
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <Input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="flex-1"
-                      onKeyDown={(e) => e.key === "Enter" && handleUpdate()}
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleUpdate}
-                      disabled={updateMember.isPending}
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setEmojiPickerFor(emojiPickerFor === member.id ? null : member.id)}
+                      className="w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all"
+                      style={{ background: "var(--color-cream)", border: "1.5px solid var(--color-border)" }}
                     >
-                      {tc("save")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditingId(null)}
-                    >
-                      {tc("cancel")}
-                    </Button>
+                      {editEmoji}
+                    </button>
+                    <EmojiPicker pickerId={member.id} onSelect={setEditEmoji} />
                   </div>
-                </CardContent>
-              </Card>
+                  <input
+                    className="input-field flex-1"
+                    value={editName}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
+                    onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleUpdate()}
+                  />
+                  <button onClick={handleUpdate} disabled={updateMember.isPending} className="btn-primary text-sm py-2 px-4">
+                    {tc("save")}
+                  </button>
+                  <button onClick={() => setEditingId(null)} className="btn-secondary text-sm py-2 px-4">
+                    {tc("cancel")}
+                  </button>
+                </div>
+              </div>
             );
           }
 
           return (
-            <Card
+            <div
               key={member.id}
-              className="border-0 shadow-sm bg-white/80 backdrop-blur-sm"
+              className="flex items-center gap-3 p-4 hover:bg-black/[0.01] transition-colors"
+              style={{ borderBottom: i < group.members.length - 1 ? "1px solid var(--color-border)" : "none" }}
             >
-              <CardContent className="p-4 flex items-center gap-3">
-                <span className="text-2xl">{member.emoji}</span>
-                <span className="font-medium text-gray-900 flex-1">
-                  {member.name}
-                </span>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => startEdit(member)}
-                    className="text-xs border-purple-200 text-purple-600 hover:bg-purple-50"
-                  >
-                    {tc("edit")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleRemove(member.id)}
-                    className={`text-xs ${
-                      deletingId === member.id
-                        ? "border-red-400 bg-red-50 text-red-600"
-                        : "border-red-200 text-red-400 hover:bg-red-50"
-                    }`}
-                  >
-                    {deletingId === member.id ? tc("confirm") : tc("delete")}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              <span className="text-2xl">{member.emoji}</span>
+              <span className="font-medium flex-1" style={{ color: "var(--color-charcoal)" }}>
+                {member.name}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => startEdit(member)}
+                  className="text-xs font-medium px-3 py-1 rounded-lg transition-colors"
+                  style={{ color: "var(--color-slate)", background: "rgba(0,0,0,0.04)" }}
+                >
+                  {tc("edit")}
+                </button>
+                <button
+                  onClick={() => handleRemove(member.id)}
+                  className="text-xs font-medium px-3 py-1 rounded-lg transition-colors"
+                  style={{
+                    color: deletingId === member.id ? "white" : "var(--color-coral)",
+                    background: deletingId === member.id ? "var(--color-coral)" : "rgba(239,100,97,0.08)",
+                  }}
+                >
+                  {deletingId === member.id ? tc("confirm") : tc("delete")}
+                </button>
+              </div>
+            </div>
           );
         })}
       </div>
 
-      {/* Add member form */}
-      <Card className="border-2 border-dashed border-purple-200 bg-white/60">
-        <CardContent className="p-4">
-          <p className="text-sm font-medium text-gray-600 mb-2">
-            {t("addMember")}
-          </p>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() =>
-                  setEmojiPickerFor(emojiPickerFor === "new" ? null : "new")
-                }
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-input bg-white text-xl hover:bg-gray-50"
-              >
-                {newEmoji}
-              </button>
-              {emojiPickerFor === "new" && (
-                <div className="absolute left-0 top-12 z-50 grid grid-cols-5 gap-1 rounded-xl border bg-white p-2 shadow-lg">
-                  {COMMON_EMOJIS.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      onClick={() => {
-                        setNewEmoji(emoji);
-                        setEmojiPickerFor(null);
-                      }}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-lg hover:bg-purple-100"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <Input
-              placeholder={t("memberName")}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              className="flex-1"
-              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            />
-            <Button
-              onClick={handleAdd}
-              disabled={!newName.trim() || addMember.isPending}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+      {/* Add member */}
+      <div
+        className="p-4 rounded-xl"
+        style={{ border: "1.5px dashed var(--color-border)" }}
+      >
+        <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-charcoal)" }}>
+          {t("addMember")}
+        </p>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setEmojiPickerFor(emojiPickerFor === "new" ? null : "new")}
+              className="w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all"
+              style={{ background: "var(--color-cream)", border: "1.5px solid var(--color-border)" }}
             >
-              {tc("add")}
-            </Button>
+              {newEmoji}
+            </button>
+            <EmojiPicker pickerId="new" onSelect={setNewEmoji} />
           </div>
-        </CardContent>
-      </Card>
+          <input
+            className="input-field flex-1"
+            placeholder={t("memberName")}
+            value={newName}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewName(e.target.value)}
+            onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleAdd()}
+          />
+          <button
+            onClick={handleAdd}
+            disabled={!newName.trim() || addMember.isPending}
+            className="btn-primary text-sm py-2 px-4"
+          >
+            {tc("add")}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

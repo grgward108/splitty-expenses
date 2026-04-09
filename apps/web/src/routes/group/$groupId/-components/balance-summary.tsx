@@ -1,7 +1,6 @@
 import { useTranslation } from "@repo/i18n";
 import { useBalancesGet } from "@repo/spec/client/balances/balances";
-import type { BalanceSummary as BalanceSummaryType } from "@repo/spec/client/model";
-import { Card, CardContent } from "@repo/ui";
+import type { BalanceSummary as BalanceSummaryType, Balance, Debt } from "@repo/spec/client/model";
 
 interface BalanceSummaryProps {
   groupId: string;
@@ -25,109 +24,108 @@ export function BalanceSummary({ groupId, currency }: BalanceSummaryProps) {
     return (
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-16 rounded-xl bg-white/60 animate-pulse"
-          />
+          <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: "var(--color-border)" }} />
         ))}
       </div>
     );
   }
 
   const data = balancesQuery.data?.data;
-  if (!data || !("balances" in data)) {
-    return null;
-  }
+  if (!data || !("balances" in data)) return null;
 
   const summary = data as BalanceSummaryType;
   const { balances, debts } = summary;
-
   const allSettled = debts.length === 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Per-member balances */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+      <div>
+        <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--color-muted)" }}>
           {t("netBalance")}
         </h3>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {balances.map((balance) => {
+        <div className="card-surface overflow-hidden">
+          {balances.map((balance: Balance, i: number) => {
             const num = Number.parseFloat(balance.balance);
-            const isPositive = num > 0;
-            const isZero = Math.abs(num) < 0.01;
+            const isPositive = num > 0.01;
+            const isNegative = num < -0.01;
 
             return (
-              <Card
+              <div
                 key={balance.memberId}
-                className="border-0 shadow-sm bg-white/80 backdrop-blur-sm"
+                className="flex items-center gap-3 p-4"
+                style={{ borderBottom: i < balances.length - 1 ? "1px solid var(--color-border)" : "none" }}
               >
-                <CardContent className="p-4 flex items-center gap-3">
-                  <span className="text-2xl">{balance.memberEmoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">
-                      {balance.memberName}
-                    </p>
-                  </div>
-                  <span
-                    className={`font-bold text-lg ${
-                      isZero
-                        ? "text-gray-400"
-                        : isPositive
-                          ? "text-emerald-600"
-                          : "text-red-500"
-                    }`}
-                  >
-                    {isZero
-                      ? formatAmount("0")
-                      : isPositive
-                        ? `+${formatAmount(balance.balance)}`
-                        : `-${formatAmount(balance.balance)}`}
-                  </span>
-                </CardContent>
-              </Card>
+                <span className="text-2xl">{balance.memberEmoji}</span>
+                <span className="font-medium flex-1" style={{ color: "var(--color-charcoal)" }}>
+                  {balance.memberName}
+                </span>
+                <span className={`text-lg font-bold tabular-nums ${isPositive ? "amount-positive" : isNegative ? "amount-negative" : ""}`}
+                  style={!isPositive && !isNegative ? { color: "var(--color-muted)" } : {}}
+                >
+                  {isPositive ? "+" : ""}{formatAmount(balance.balance)}
+                  {isNegative && <span className="text-xs font-normal ml-1" style={{ color: "var(--color-muted)" }}>owes</span>}
+                </span>
+              </div>
             );
           })}
         </div>
       </div>
 
       {/* Simplified Debts */}
-      <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+      <div>
+        <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--color-muted)" }}>
           {t("simplifiedDebts")}
         </h3>
 
         {allSettled ? (
-          <div className="text-center py-8">
-            <span className="text-5xl mb-3 block">\u2705</span>
-            <p className="text-lg font-medium text-emerald-600">
+          <div
+            className="text-center py-10 rounded-2xl"
+            style={{ background: "var(--color-sage-light)" }}
+          >
+            <div className="text-4xl mb-2">{"\u2705"}</div>
+            <p className="text-lg font-semibold" style={{ color: "var(--color-sage)" }}>
               {t("allSettled")}
             </p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {debts.map((debt, index) => (
-              <Card
+          <div className="space-y-2 stagger-children">
+            {debts.map((debt: Debt, index: number) => (
+              <div
                 key={index}
-                className="border-0 shadow-sm bg-white/80 backdrop-blur-sm"
+                className="card-surface p-4 flex items-center gap-3"
               >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xl">{debt.fromMemberEmoji}</span>
-                    <span className="font-medium text-gray-900">
-                      {debt.fromMemberName}
-                    </span>
-                    <span className="text-gray-400 mx-1">\u2192</span>
-                    <span className="text-xl">{debt.toMemberEmoji}</span>
-                    <span className="font-medium text-gray-900">
-                      {debt.toMemberName}
-                    </span>
-                    <span className="ml-auto font-bold text-orange-600">
-                      {formatAmount(debt.amount)}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* From */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl">{debt.fromMemberEmoji}</span>
+                  <span className="font-medium truncate text-sm" style={{ color: "var(--color-charcoal)" }}>
+                    {debt.fromMemberName}
+                  </span>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <div className="w-8 h-[2px] rounded" style={{ background: "var(--color-amber)" }} />
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"
+                    style={{ color: "var(--color-amber)" }}
+                  >
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </div>
+
+                {/* To */}
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xl">{debt.toMemberEmoji}</span>
+                  <span className="font-medium truncate text-sm" style={{ color: "var(--color-charcoal)" }}>
+                    {debt.toMemberName}
+                  </span>
+                </div>
+
+                {/* Amount */}
+                <span className="ml-auto font-bold text-lg tabular-nums whitespace-nowrap" style={{ color: "var(--color-amber)" }}>
+                  {formatAmount(debt.amount)}
+                </span>
+              </div>
             ))}
           </div>
         )}

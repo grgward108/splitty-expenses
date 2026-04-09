@@ -1,14 +1,6 @@
 import { useTranslation } from "@repo/i18n";
 import { useGroupsGet } from "@repo/spec/client/groups/groups";
 import type { Group } from "@repo/spec/client/model";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-  Skeleton,
-  Button,
-} from "@repo/ui";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { ExpenseList } from "./-components/expense-list";
@@ -21,10 +13,13 @@ export const Route = createFileRoute("/group/$groupId")({
   component: GroupPage,
 });
 
+type TabValue = "expenses" | "balances" | "members";
+
 function GroupPage() {
   const { groupId } = Route.useParams();
   const { t } = useTranslation("groups");
   const groupQuery = useGroupsGet(groupId);
+  const [activeTab, setActiveTab] = useState<TabValue>("expenses");
   const [expenseDialogOpen, setExpenseDialogOpen] = useState(false);
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
@@ -35,103 +30,120 @@ function GroupPage() {
 
   if (groupQuery.isError || !groupQuery.data) {
     return (
-      <div className="text-center py-12">
-        <span className="text-4xl mb-4 block">\ud83d\ude15</span>
-        <p className="text-gray-500 text-lg">{t("groupNotFound")}</p>
+      <div className="text-center py-16">
+        <span className="text-5xl block mb-4">:/</span>
+        <p className="text-lg font-medium" style={{ color: "var(--color-muted)" }}>{t("groupNotFound")}</p>
       </div>
     );
   }
 
   const group = groupQuery.data.data as Group;
-
   if (!("id" in group)) {
     return (
-      <div className="text-center py-12">
-        <span className="text-4xl mb-4 block">\ud83d\ude15</span>
-        <p className="text-gray-500 text-lg">{t("groupNotFound")}</p>
+      <div className="text-center py-16">
+        <span className="text-5xl block mb-4">:/</span>
+        <p className="text-lg font-medium" style={{ color: "var(--color-muted)" }}>{t("groupNotFound")}</p>
       </div>
     );
   }
 
+  const tabs: { value: TabValue; label: string }[] = [
+    { value: "expenses", label: t("expenses") },
+    { value: "balances", label: t("balances") },
+    { value: "members", label: t("members") },
+  ];
+
   return (
-    <div className="mx-auto max-w-2xl">
-      {/* Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div className="animate-slide-up">
+      {/* Group Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{group.name}</h1>
-          <p className="text-sm text-gray-500">
-            {group.currency} &middot; {group.members.length} {t("members").toLowerCase()}
-          </p>
+          <h1 className="font-display text-3xl sm:text-4xl italic tracking-tight" style={{ color: "var(--color-charcoal)" }}>
+            {group.name}
+          </h1>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm font-medium" style={{ color: "var(--color-muted)" }}>
+              {group.currency}
+            </span>
+            <span style={{ color: "var(--color-border)" }}>&bull;</span>
+            <span className="text-sm" style={{ color: "var(--color-muted)" }}>
+              {group.members.length} {t("members").toLowerCase()}
+            </span>
+            <div className="flex -space-x-1.5 ml-1">
+              {group.members.slice(0, 5).map((m) => (
+                <span key={m.id} className="text-base" title={m.name}>{m.emoji}</span>
+              ))}
+              {group.members.length > 5 && (
+                <span className="text-xs font-medium pl-1" style={{ color: "var(--color-muted)" }}>
+                  +{group.members.length - 5}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
+          <button
             onClick={() => setShareOpen(!shareOpen)}
-            className="border-purple-200 text-purple-600 hover:bg-purple-50"
+            className="btn-secondary text-sm flex items-center gap-1.5"
           >
-            \ud83d\udcce {t("shareGroup")}
-          </Button>
-          <Button
-            onClick={() => {
-              setEditingExpenseId(null);
-              setExpenseDialogOpen(true);
-            }}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg shadow-purple-200"
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+              <polyline points="16 6 12 2 8 6" />
+              <line x1="12" y1="2" x2="12" y2="15" />
+            </svg>
+            {t("shareGroup")}
+          </button>
+          <button
+            onClick={() => { setEditingExpenseId(null); setExpenseDialogOpen(true); }}
+            className="btn-primary text-sm flex items-center gap-1.5"
           >
-            + {t("addExpense")}
-          </Button>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            {t("addExpense")}
+          </button>
         </div>
       </div>
 
       {/* Share Link */}
       {shareOpen && (
-        <div className="mb-4">
+        <div className="mb-5 animate-slide-up">
           <ShareLink groupId={groupId} />
         </div>
       )}
 
       {/* Tabs */}
-      <Tabs defaultValue="expenses" className="w-full">
-        <TabsList className="w-full grid grid-cols-3 bg-white/80 backdrop-blur-sm rounded-xl p-1 shadow-sm border border-white/60">
-          <TabsTrigger
-            value="expenses"
-            className="rounded-lg aria-selected:bg-gradient-to-r aria-selected:from-purple-500 aria-selected:to-pink-500 aria-selected:text-white aria-selected:shadow-sm"
+      <div
+        className="flex p-1 rounded-xl mb-5"
+        style={{ background: "rgba(0,0,0,0.04)" }}
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setActiveTab(tab.value)}
+            className={`flex-1 py-2 px-4 rounded-lg text-sm font-semibold transition-all ${
+              activeTab === tab.value ? "tab-active" : ""
+            }`}
+            style={activeTab !== tab.value ? { color: "var(--color-muted)" } : {}}
           >
-            \ud83d\udcb8 {t("expenses")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="balances"
-            className="rounded-lg aria-selected:bg-gradient-to-r aria-selected:from-purple-500 aria-selected:to-pink-500 aria-selected:text-white aria-selected:shadow-sm"
-          >
-            \u2696\ufe0f {t("balances")}
-          </TabsTrigger>
-          <TabsTrigger
-            value="members"
-            className="rounded-lg aria-selected:bg-gradient-to-r aria-selected:from-purple-500 aria-selected:to-pink-500 aria-selected:text-white aria-selected:shadow-sm"
-          >
-            \ud83d\udc65 {t("members")}
-          </TabsTrigger>
-        </TabsList>
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-        <TabsContent value="expenses" className="mt-4">
+      {/* Tab Content */}
+      <div className="animate-slide-up" key={activeTab}>
+        {activeTab === "expenses" && (
           <ExpenseList
             groupId={groupId}
             group={group}
-            onEdit={(expenseId) => {
-              setEditingExpenseId(expenseId);
-              setExpenseDialogOpen(true);
-            }}
+            onEdit={(expenseId: string) => { setEditingExpenseId(expenseId); setExpenseDialogOpen(true); }}
           />
-        </TabsContent>
-
-        <TabsContent value="balances" className="mt-4">
-          <BalanceSummary groupId={groupId} currency={group.currency} />
-        </TabsContent>
-
-        <TabsContent value="members" className="mt-4">
-          <MemberList groupId={groupId} group={group} />
-        </TabsContent>
-      </Tabs>
+        )}
+        {activeTab === "balances" && <BalanceSummary groupId={groupId} currency={group.currency} />}
+        {activeTab === "members" && <MemberList groupId={groupId} group={group} />}
+      </div>
 
       {/* Expense Dialog */}
       <ExpenseFormDialog
@@ -147,19 +159,16 @@ function GroupPage() {
 
 function GroupSkeleton() {
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-24" />
-        </div>
-        <Skeleton className="h-10 w-32" />
+    <div className="space-y-5">
+      <div className="space-y-2">
+        <div className="h-10 w-56 rounded-lg animate-pulse" style={{ background: "var(--color-border)" }} />
+        <div className="h-4 w-32 rounded animate-pulse" style={{ background: "var(--color-border)" }} />
       </div>
-      <Skeleton className="h-12 w-full rounded-xl" />
+      <div className="h-12 w-full rounded-xl animate-pulse" style={{ background: "var(--color-border)" }} />
       <div className="space-y-3">
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
-        <Skeleton className="h-24 w-full rounded-xl" />
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-20 rounded-xl animate-pulse" style={{ background: "var(--color-border)" }} />
+        ))}
       </div>
     </div>
   );
