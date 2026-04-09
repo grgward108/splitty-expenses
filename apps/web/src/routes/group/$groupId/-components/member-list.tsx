@@ -1,9 +1,5 @@
 import { useTranslation } from "@repo/i18n";
-import {
-  useMembersAdd,
-  useMembersUpdate,
-  useMembersRemove,
-} from "@repo/spec/client/members/members";
+import { useMembersAdd, useMembersUpdate, useMembersRemove } from "@repo/spec/client/members/members";
 import { getGroupsGetQueryKey } from "@repo/spec/client/groups/groups";
 import { getBalancesGetQueryKey } from "@repo/spec/client/balances/balances";
 import type { Group, Member } from "@repo/spec/client/model";
@@ -17,10 +13,9 @@ const EMOJIS = [
   "\ud83d\udc35", "\ud83d\udc37", "\ud83d\udc25", "\ud83e\udd85", "\ud83e\udd84",
 ];
 
-interface MemberListProps {
-  groupId: string;
-  group: Group;
-}
+const COLORS = ["var(--cyan)", "var(--pink)", "var(--lime)", "var(--lavender)", "var(--yellow)", "var(--red)"];
+
+interface MemberListProps { groupId: string; group: Group; }
 
 export function MemberList({ groupId, group }: MemberListProps) {
   const { t } = useTranslation("home");
@@ -51,11 +46,7 @@ export function MemberList({ groupId, group }: MemberListProps) {
     );
   };
 
-  const startEdit = (member: Member) => {
-    setEditingId(member.id);
-    setEditName(member.name);
-    setEditEmoji(member.emoji);
-  };
+  const startEdit = (member: Member) => { setEditingId(member.id); setEditName(member.name); setEditEmoji(member.emoji); };
 
   const handleUpdate = () => {
     if (!editingId || !editName.trim()) return;
@@ -67,77 +58,64 @@ export function MemberList({ groupId, group }: MemberListProps) {
 
   const handleRemove = (memberId: string) => {
     if (deletingId === memberId) {
-      removeMember.mutate(
-        { groupId, memberId },
-        { onSuccess: () => { setDeletingId(null); invalidate(); } }
-      );
+      removeMember.mutate({ groupId, memberId }, { onSuccess: () => { setDeletingId(null); invalidate(); } });
     } else {
       setDeletingId(memberId);
     }
   };
 
-  const EmojiPicker = ({ pickerId, onSelect }: { pickerId: string; onSelect: (emoji: string) => void }) => {
+  const EmojiPicker = ({ pickerId, onSelect }: { pickerId: string; onSelect: (e: string) => void }) => {
     if (emojiPickerFor !== pickerId) return null;
     return (
       <div
-        className="absolute left-0 top-13 z-50 grid grid-cols-5 gap-1 p-2.5 rounded-xl shadow-xl"
-        style={{ background: "var(--color-warm-white)", border: "1px solid var(--color-border)" }}
+        className="absolute left-0 top-14 z-50 p-3 animate-pop"
+        style={{ width: "220px", background: "var(--white)", border: "var(--border)", boxShadow: "var(--shadow)" }}
       >
-        {EMOJIS.map((emoji) => (
-          <button
-            key={emoji}
-            type="button"
-            onClick={() => { onSelect(emoji); setEmojiPickerFor(null); }}
-            className="w-9 h-9 rounded-lg text-lg flex items-center justify-center hover:bg-black/5 transition-colors"
-          >
-            {emoji}
-          </button>
-        ))}
+        <div className="grid grid-cols-5 gap-1">
+          {EMOJIS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              onClick={() => { onSelect(emoji); setEmojiPickerFor(null); }}
+              className="w-9 h-9 flex items-center justify-center text-lg hover:scale-125 transition-transform"
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
       </div>
     );
   };
 
   return (
     <div className="space-y-4">
-      {/* Member cards */}
-      <div className="card-surface overflow-hidden">
+      <div className="brutal-card overflow-hidden">
         {group.members.map((member: Member, i: number) => {
           const isEditing = editingId === member.id;
 
           if (isEditing) {
             return (
-              <div
-                key={member.id}
-                className="p-4"
-                style={{
-                  borderBottom: i < group.members.length - 1 ? "1px solid var(--color-border)" : "none",
-                  background: "rgba(0,0,0,0.02)",
-                }}
-              >
+              <div key={member.id} className="p-4" style={{ background: "var(--yellow)", borderBottom: i < group.members.length - 1 ? "3px dashed var(--black)" : "none" }}>
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setEmojiPickerFor(emojiPickerFor === member.id ? null : member.id)}
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all"
-                      style={{ background: "var(--color-cream)", border: "1.5px solid var(--color-border)" }}
+                      className="w-12 h-12 flex items-center justify-center text-xl"
+                      style={{ border: "var(--border)", background: "var(--white)" }}
                     >
                       {editEmoji}
                     </button>
                     <EmojiPicker pickerId={member.id} onSelect={setEditEmoji} />
                   </div>
                   <input
-                    className="input-field flex-1"
+                    className="input-brutal flex-1"
                     value={editName}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditName(e.target.value)}
                     onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleUpdate()}
                   />
-                  <button onClick={handleUpdate} disabled={updateMember.isPending} className="btn-primary text-sm py-2 px-4">
-                    {tc("save")}
-                  </button>
-                  <button onClick={() => setEditingId(null)} className="btn-secondary text-sm py-2 px-4">
-                    {tc("cancel")}
-                  </button>
+                  <button onClick={handleUpdate} disabled={updateMember.isPending} className="btn-brutal text-xs py-2 px-3">{tc("save")}</button>
+                  <button onClick={() => setEditingId(null)} className="btn-brutal-outline text-xs py-2 px-3">{tc("cancel")}</button>
                 </div>
               </div>
             );
@@ -146,27 +124,26 @@ export function MemberList({ groupId, group }: MemberListProps) {
           return (
             <div
               key={member.id}
-              className="flex items-center gap-3 p-4 hover:bg-black/[0.01] transition-colors"
-              style={{ borderBottom: i < group.members.length - 1 ? "1px solid var(--color-border)" : "none" }}
+              className="flex items-center gap-3 p-4"
+              style={{ borderBottom: i < group.members.length - 1 ? "3px dashed var(--black)" : "none" }}
             >
-              <span className="text-2xl">{member.emoji}</span>
-              <span className="font-medium flex-1" style={{ color: "var(--color-charcoal)" }}>
-                {member.name}
-              </span>
+              <div
+                className="w-10 h-10 flex items-center justify-center text-xl"
+                style={{ background: COLORS[i % COLORS.length], border: "2px solid var(--black)" }}
+              >
+                {member.emoji}
+              </div>
+              <span className="font-bold flex-1">{member.name}</span>
               <div className="flex gap-2">
-                <button
-                  onClick={() => startEdit(member)}
-                  className="text-xs font-medium px-3 py-1 rounded-lg transition-colors"
-                  style={{ color: "var(--color-slate)", background: "rgba(0,0,0,0.04)" }}
-                >
-                  {tc("edit")}
-                </button>
+                <button onClick={() => startEdit(member)} className="btn-brutal-outline text-xs py-1 px-3">{tc("edit")}</button>
                 <button
                   onClick={() => handleRemove(member.id)}
-                  className="text-xs font-medium px-3 py-1 rounded-lg transition-colors"
+                  className="text-xs font-bold py-1 px-3 transition-all"
                   style={{
-                    color: deletingId === member.id ? "white" : "var(--color-coral)",
-                    background: deletingId === member.id ? "var(--color-coral)" : "rgba(239,100,97,0.08)",
+                    border: "2px solid var(--black)",
+                    boxShadow: "2px 2px 0 var(--black)",
+                    background: deletingId === member.id ? "var(--red)" : "var(--white)",
+                    color: deletingId === member.id ? "var(--white)" : "var(--red)",
                   }}
                 >
                   {deletingId === member.id ? tc("confirm") : tc("delete")}
@@ -178,39 +155,28 @@ export function MemberList({ groupId, group }: MemberListProps) {
       </div>
 
       {/* Add member */}
-      <div
-        className="p-4 rounded-xl"
-        style={{ border: "1.5px dashed var(--color-border)" }}
-      >
-        <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-charcoal)" }}>
-          {t("addMember")}
-        </p>
+      <div className="p-4" style={{ border: "3px dashed var(--black)" }}>
+        <span className="font-display text-xs block mb-2">{t("addMember")}</span>
         <div className="flex items-center gap-2">
           <div className="relative">
             <button
               type="button"
               onClick={() => setEmojiPickerFor(emojiPickerFor === "new" ? null : "new")}
-              className="w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all"
-              style={{ background: "var(--color-cream)", border: "1.5px solid var(--color-border)" }}
+              className="w-12 h-12 flex items-center justify-center text-xl"
+              style={{ border: "var(--border)", boxShadow: "var(--shadow-sm)", background: "var(--lavender)" }}
             >
               {newEmoji}
             </button>
             <EmojiPicker pickerId="new" onSelect={setNewEmoji} />
           </div>
           <input
-            className="input-field flex-1"
+            className="input-brutal flex-1"
             placeholder={t("memberName")}
             value={newName}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewName(e.target.value)}
             onKeyDown={(e: React.KeyboardEvent) => e.key === "Enter" && handleAdd()}
           />
-          <button
-            onClick={handleAdd}
-            disabled={!newName.trim() || addMember.isPending}
-            className="btn-primary text-sm py-2 px-4"
-          >
-            {tc("add")}
-          </button>
+          <button onClick={handleAdd} disabled={!newName.trim() || addMember.isPending} className="btn-brutal text-xs py-2 px-4">{tc("add")}</button>
         </div>
       </div>
     </div>

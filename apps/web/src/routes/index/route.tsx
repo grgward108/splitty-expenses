@@ -8,15 +8,14 @@ export const Route = createFileRoute("/")({
 });
 
 const CURRENCIES = [
-  { code: "USD", symbol: "$", label: "$ USD" },
-  { code: "EUR", symbol: "\u20ac", label: "\u20ac EUR" },
-  { code: "GBP", symbol: "\u00a3", label: "\u00a3 GBP" },
-  { code: "JPY", symbol: "\u00a5", label: "\u00a5 JPY" },
-  { code: "AUD", symbol: "A$", label: "A$ AUD" },
-  { code: "CAD", symbol: "C$", label: "C$ CAD" },
-  { code: "SGD", symbol: "S$", label: "S$ SGD" },
-  { code: "THB", symbol: "\u0e3f", label: "\u0e3f THB" },
-  { code: "IDR", symbol: "Rp", label: "Rp IDR" },
+  { code: "USD", label: "$ USD" },
+  { code: "EUR", label: "\u20ac EUR" },
+  { code: "GBP", label: "\u00a3 GBP" },
+  { code: "JPY", label: "\u00a5 JPY" },
+  { code: "AUD", label: "A$ AUD" },
+  { code: "SGD", label: "S$ SGD" },
+  { code: "THB", label: "\u0e3f THB" },
+  { code: "IDR", label: "Rp IDR" },
 ];
 
 const EMOJIS = [
@@ -26,23 +25,13 @@ const EMOJIS = [
   "\ud83d\udc35", "\ud83d\udc37", "\ud83d\udc25", "\ud83e\udd85", "\ud83e\udd84",
 ];
 
-interface MemberInput {
-  name: string;
-  emoji: string;
-}
+const COLOR_ROTATION = ["var(--cyan)", "var(--pink)", "var(--lime)", "var(--lavender)", "var(--yellow)", "var(--red)"];
 
-interface RecentGroup {
-  id: string;
-  name: string;
-}
+interface MemberInput { name: string; emoji: string; }
+interface RecentGroup { id: string; name: string; }
 
 function getRecentGroups(): RecentGroup[] {
-  try {
-    const stored = localStorage.getItem("splitty_recent_groups");
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
+  try { return JSON.parse(localStorage.getItem("splitty_recent_groups") ?? "[]"); } catch { return []; }
 }
 
 function saveRecentGroup(group: RecentGroup) {
@@ -77,14 +66,9 @@ function HomePage() {
     setMembers((prev) => prev.filter((_: MemberInput, i: number) => i !== index));
   }, []);
 
-  const updateMember = useCallback(
-    (index: number, field: keyof MemberInput, value: string) => {
-      setMembers((prev) =>
-        prev.map((m: MemberInput, i: number) => (i === index ? { ...m, [field]: value } : m))
-      );
-    },
-    []
-  );
+  const updateMember = useCallback((index: number, field: keyof MemberInput, value: string) => {
+    setMembers((prev) => prev.map((m: MemberInput, i: number) => (i === index ? { ...m, [field]: value } : m)));
+  }, []);
 
   const validMembers = members.filter((m: MemberInput) => m.name.trim());
   const canSubmit = groupName.trim() && validMembers.length >= 2;
@@ -92,47 +76,37 @@ function HomePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-
     createGroup.mutate(
-      {
-        data: {
-          name: groupName.trim(),
-          currency,
-          members: validMembers.map((m: MemberInput) => ({ name: m.name.trim(), emoji: m.emoji })),
-        },
-      },
+      { data: { name: groupName.trim(), currency, members: validMembers.map((m: MemberInput) => ({ name: m.name.trim(), emoji: m.emoji })) } },
       {
         onSuccess: (response: { data: { id: string; name: string } }) => {
-          const group = response.data;
-          saveRecentGroup({ id: group.id, name: group.name });
-          navigate({ to: "/group/$groupId", params: { groupId: group.id } });
+          saveRecentGroup({ id: response.data.id, name: response.data.name });
+          navigate({ to: "/group/$groupId", params: { groupId: response.data.id } });
         },
       }
     );
   };
 
   return (
-    <div className="animate-slide-up">
-      {/* Hero */}
-      <div className="text-center mb-8 pt-4">
-        <h1 className="font-display text-4xl sm:text-5xl italic tracking-tight mb-2" style={{ color: "var(--color-charcoal)" }}>
+    <div className="animate-in">
+      {/* HERO */}
+      <div className="mb-8 pt-2">
+        <div className="inline-block mb-3 px-3 py-1" style={{ background: "var(--cyan)", border: "2px solid var(--black)", transform: "rotate(-1deg)" }}>
+          <span className="font-display text-xs">SPLIT BILLS, NOT FRIENDSHIPS</span>
+        </div>
+        <h1 className="font-display text-4xl sm:text-5xl leading-none">
           {t("title")}
         </h1>
-        <p style={{ color: "var(--color-muted)" }} className="text-base">
-          Split expenses, not friendships
-        </p>
       </div>
 
-      {/* Form Card */}
-      <div className="card-surface p-6 sm:p-8 bg-noise">
+      {/* FORM */}
+      <div className="brutal-card p-5 sm:p-7 animate-pop">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Group Name */}
           <div>
-            <label className="block text-sm font-semibold mb-2" style={{ color: "var(--color-charcoal)" }}>
-              {t("groupName")}
-            </label>
+            <label className="font-display text-xs block mb-2">{t("groupName")}</label>
             <input
-              className="input-field"
+              className="input-brutal"
               placeholder={t("groupNamePlaceholder")}
               value={groupName}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGroupName(e.target.value)}
@@ -141,20 +115,21 @@ function HomePage() {
 
           {/* Currency */}
           <div>
-            <label className="block text-sm font-semibold mb-2" style={{ color: "var(--color-charcoal)" }}>
-              {t("currency")}
-            </label>
+            <label className="font-display text-xs block mb-2">{t("currency")}</label>
             <div className="flex flex-wrap gap-2">
               {CURRENCIES.map((c) => (
                 <button
                   key={c.code}
                   type="button"
                   onClick={() => setCurrency(c.code)}
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                  className="px-3 py-1.5 text-xs font-bold transition-all"
                   style={{
-                    background: currency === c.code ? "var(--color-charcoal)" : "transparent",
-                    color: currency === c.code ? "white" : "var(--color-slate)",
-                    border: currency === c.code ? "1.5px solid var(--color-charcoal)" : "1.5px solid var(--color-border)",
+                    fontFamily: "'Space Mono', monospace",
+                    background: currency === c.code ? "var(--black)" : "var(--white)",
+                    color: currency === c.code ? "var(--white)" : "var(--black)",
+                    border: "2px solid var(--black)",
+                    boxShadow: currency === c.code ? "none" : "2px 2px 0 var(--black)",
+                    transform: currency === c.code ? "translate(2px, 2px)" : "none",
                   }}
                 >
                   {c.label}
@@ -165,51 +140,53 @@ function HomePage() {
 
           {/* Members */}
           <div>
-            <label className="block text-sm font-semibold mb-3" style={{ color: "var(--color-charcoal)" }}>
-              {t("members")}
-            </label>
-            <div className="space-y-2.5">
+            <label className="font-display text-xs block mb-3">{t("members")}</label>
+            <div className="space-y-3">
               {members.map((member: MemberInput, index: number) => (
-                <div key={index} className="flex items-center gap-2 animate-slide-up" style={{ animationDelay: `${index * 50}ms` }}>
-                  {/* Emoji picker */}
+                <div key={index} className="flex items-center gap-2">
+                  {/* Emoji button */}
                   <div className="relative">
                     <button
                       type="button"
                       onClick={() => setEmojiPickerIndex(emojiPickerIndex === index ? null : index)}
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-xl transition-all hover:scale-105"
+                      className="w-12 h-12 flex items-center justify-center text-xl transition-all"
                       style={{
-                        background: "var(--color-cream)",
-                        border: "1.5px solid var(--color-border)",
+                        border: "var(--border)",
+                        boxShadow: "var(--shadow-sm)",
+                        background: COLOR_ROTATION[index % COLOR_ROTATION.length],
                       }}
                     >
                       {member.emoji}
                     </button>
+                    {/* Emoji Picker */}
                     {emojiPickerIndex === index && (
                       <div
-                        className="absolute left-0 top-13 z-50 grid grid-cols-5 gap-1 p-2.5 rounded-xl shadow-xl"
+                        className="absolute left-0 top-14 z-50 p-3 animate-pop"
                         style={{
-                          background: "var(--color-warm-white)",
-                          border: "1px solid var(--color-border)",
+                          width: "220px",
+                          background: "var(--white)",
+                          border: "var(--border)",
+                          boxShadow: "var(--shadow)",
                         }}
                       >
-                        {EMOJIS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            type="button"
-                            onClick={() => {
-                              updateMember(index, "emoji", emoji);
-                              setEmojiPickerIndex(null);
-                            }}
-                            className="w-9 h-9 rounded-lg text-lg flex items-center justify-center hover:bg-black/5 transition-colors"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
+                        <div className="grid grid-cols-5 gap-1">
+                          {EMOJIS.map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => { updateMember(index, "emoji", emoji); setEmojiPickerIndex(null); }}
+                              className="w-9 h-9 flex items-center justify-center text-lg hover:scale-125 transition-transform"
+                              style={{ border: "1px solid transparent" }}
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
                   <input
-                    className="input-field flex-1"
+                    className="input-brutal flex-1"
                     placeholder={`${t("memberName")} ${index + 1}`}
                     value={member.name}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateMember(index, "name", e.target.value)}
@@ -218,13 +195,13 @@ function HomePage() {
                     <button
                       type="button"
                       onClick={() => removeMember(index)}
-                      className="w-11 h-11 rounded-xl flex items-center justify-center transition-all hover:bg-red-50"
-                      style={{ color: "var(--color-coral)", border: "1.5px solid transparent" }}
+                      className="w-12 h-12 flex items-center justify-center text-lg font-bold transition-all"
+                      style={{
+                        border: "2px solid var(--black)",
+                        color: "var(--red)",
+                      }}
                     >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
+                      X
                     </button>
                   )}
                 </div>
@@ -234,19 +211,20 @@ function HomePage() {
             <button
               type="button"
               onClick={addMember}
-              className="w-full mt-3 py-2.5 rounded-xl text-sm font-medium transition-all"
+              className="w-full mt-3 py-3 text-sm font-bold transition-all"
               style={{
-                border: "1.5px dashed var(--color-border)",
-                color: "var(--color-muted)",
+                fontFamily: "'Space Mono', monospace",
+                border: "3px dashed var(--black)",
+                background: "transparent",
               }}
             >
               + {t("addMember")}
             </button>
 
             {members.length >= 2 && validMembers.length < 2 && (
-              <p className="text-sm mt-2 text-center" style={{ color: "var(--color-amber)" }}>
+              <div className="mt-2 px-3 py-2 text-xs font-bold text-center" style={{ background: "var(--red)", color: "var(--white)", border: "2px solid var(--black)" }}>
                 {t("needAtLeastTwo")}
-              </p>
+              </div>
             )}
           </div>
 
@@ -254,7 +232,7 @@ function HomePage() {
           <button
             type="submit"
             disabled={!canSubmit || createGroup.isPending}
-            className="btn-primary w-full text-center"
+            className="btn-brutal w-full text-center"
           >
             {createGroup.isPending ? tc("saving") : t("createGroup")}
           </button>
@@ -264,34 +242,24 @@ function HomePage() {
       {/* Recent Groups */}
       {recentGroups.length > 0 && (
         <div className="mt-10">
-          <h2 className="font-display text-xl italic mb-4" style={{ color: "var(--color-charcoal)" }}>
-            {t("recentGroups")}
-          </h2>
-          <div className="space-y-2 stagger-children">
-            {recentGroups.map((group: RecentGroup) => (
+          <div className="inline-block mb-4 px-3 py-1" style={{ background: "var(--lavender)", border: "2px solid var(--black)", transform: "rotate(1deg)" }}>
+            <span className="font-display text-xs">{t("recentGroups")}</span>
+          </div>
+          <div className="space-y-3 stagger">
+            {recentGroups.map((group: RecentGroup, i: number) => (
               <button
                 key={group.id}
                 onClick={() => navigate({ to: "/group/$groupId", params: { groupId: group.id } })}
-                className="w-full text-left p-4 rounded-xl transition-all flex items-center gap-3 group"
-                style={{
-                  background: "var(--color-warm-white)",
-                  border: "1px solid var(--color-border)",
-                }}
+                className="w-full text-left p-4 flex items-center gap-3 brutal-card"
               >
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
-                  style={{ background: "var(--color-cream)" }}
+                  className="w-10 h-10 flex items-center justify-center font-display text-sm"
+                  style={{ background: COLOR_ROTATION[i % COLOR_ROTATION.length], border: "2px solid var(--black)" }}
                 >
-                  {group.name.slice(0, 1).toUpperCase()}
+                  {group.name.slice(0, 2).toUpperCase()}
                 </div>
-                <span className="font-medium flex-1">{group.name}</span>
-                <svg
-                  width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                  style={{ color: "var(--color-muted)" }}
-                  className="transition-transform group-hover:translate-x-1"
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
+                <span className="font-bold flex-1">{group.name}</span>
+                <span className="font-display text-lg">{"\u2192"}</span>
               </button>
             ))}
           </div>
